@@ -1,0 +1,206 @@
+/* ==========================================================
+   Variabili colore e misure
+   Definite una volta sola e riusate ovunque con var(--nome).
+   Nella Tappa 3 aggiungeremo i valori per il tema scuro.
+   ========================================================== */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #1f2933;
+  --text-muted: #6b7785;
+  --border: #dde1e6;
+  --accent: #e4572e;        /* rosso "pomodoro" */
+  --accent-text: #ffffff;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ==========================================================
+   Base
+   ========================================================== */
+* {
+  box-sizing: border-box;   /* le dimensioni includono bordi e padding */
+}
+
+body {
+  margin: 0;
+  padding: 0 1rem 2rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+h1, h2 {
+  margin: 0;
+}
+
+/* ==========================================================
+   Intestazione
+   ========================================================== */
+.app-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 0;
+  display: flex;                    /* elementi in riga */
+  justify-content: space-between;   /* titolo a sinistra, pulsante a destra */
+  align-items: center;
+}
+
+/* ==========================================================
+   Layout: una colonna su schermi stretti, due su quelli larghi
+   ========================================================== */
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 800px) {
+  .layout {
+    grid-template-columns: 3fr 2fr;  /* to-do più larga del timer */
+  }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.card h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+/* ==========================================================
+   Pulsanti e campi di testo
+   ========================================================== */
+.button,
+.icon-button,
+.filter {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.button {
+  padding: 0.5rem 1rem;
+}
+
+.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.icon-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+}
+
+input[type="text"] {
+  font: inherit;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ==========================================================
+   To-do list
+   ========================================================== */
+.todo-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.todo-form input {
+  flex: 1;          /* il campo occupa tutto lo spazio disponibile */
+  min-width: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.filter.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--surface);
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* ==========================================================
+   Pomodoro timer
+   ========================================================== */
+#timer-section {
+  text-align: center;
+}
+
+.timer-mode {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.timer-display {
+  margin: 0.5rem 0 1.5rem;
+  font-size: 4.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;   /* cifre di larghezza fissa: il numero non "balla" */
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.timer-cycle {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+}

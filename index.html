@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Impostazioni di base: caratteri accentati e adattamento agli schermi piccoli -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus App</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Intestazione: titolo dell'app e interruttore del tema (attivato nella Tappa 3) -->
+  <header class="app-header">
+    <h1>Focus App</h1>
+    <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema">🌙</button>
+  </header>
+
+  <!-- Contenuto principale: due sezioni affiancate -->
+  <main class="layout">
+
+    <!-- Sezione To-do list -->
+    <section class="card" id="todo-section">
+      <h2>To-do list</h2>
+
+      <form id="todo-form" class="todo-form">
+        <input id="todo-input" type="text" placeholder="Cosa devi fare?" autocomplete="off" required>
+        <button type="submit" class="button primary">Aggiungi</button>
+      </form>
+
+      <div class="filters" role="group" aria-label="Filtra task">
+        <button type="button" class="filter active" data-filter="all">Tutte</button>
+        <button type="button" class="filter" data-filter="active">Da fare</button>
+        <button type="button" class="filter" data-filter="done">Completate</button>
+      </div>
+
+      <ul id="todo-list" class="todo-list">
+        <!-- Task di esempio: verranno generate da JavaScript nella Tappa 4 -->
+        <li class="todo-item">
+          <input type="checkbox">
+          <span class="todo-text">Esempio di task</span>
+        </li>
+        <li class="todo-item done">
+          <input type="checkbox" checked>
+          <span class="todo-text">Task completata di esempio</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Sezione Pomodoro timer -->
+    <section class="card" id="timer-section">
+      <h2>Pomodoro</h2>
+
+      <p id="timer-mode" class="timer-mode">Lavoro</p>
+      <p id="timer-display" class="timer-display">25:00</p>
+
+      <div class="timer-controls">
+        <button id="timer-start" type="button" class="button primary">Avvia</button>
+        <button id="timer-reset" type="button" class="button">Reset</button>
+      </div>
+
+      <p id="timer-cycle" class="timer-cycle">Ciclo 1 di 4</p>
+    </section>
+
+  </main>
+
+  <!-- Il JavaScript viene caricato come modulo (per questo serve Live Server) -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
