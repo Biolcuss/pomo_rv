@@ -177,6 +177,29 @@ input[type="text"] {
   border-bottom: none;
 }
 
+.todo-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;   /* le parole lunghe vanno a capo invece di uscire dalla card */
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.icon-button.small {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem;
+}
+
+.empty-message {
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
 .todo-item.done .todo-text {
   text-decoration: line-through;
   color: var(--text-muted);
