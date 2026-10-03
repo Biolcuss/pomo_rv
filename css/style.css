@@ -61,7 +61,7 @@ h1, h2 {
 
 @media (min-width: 800px) {
   .layout {
-    grid-template-columns: 3fr 2fr;  /* to-do più larga del timer */
+    grid-template-columns: 2fr 3fr;  /* timer a sinistra, to-do più larga a destra */
   }
 }
 
