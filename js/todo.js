@@ -114,17 +114,17 @@ function createTaskMenu() {
   menu.setAttribute('role', 'menu');
 
   const items = [
-    ['edit', '✏️', 'Modifica'],
-    ['tag', '🏷️', 'Tag'],
-    ['delete', '🗑️', 'Elimina'],
+    ['edit', 'Modifica'],
+    ['tag', 'Tag'],
+    ['delete', 'Elimina'],
   ];
-  for (const [action, icon, label] of items) {
+  for (const [action, label] of items) {
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'menu-item';
     item.dataset.action = action;
     item.setAttribute('role', 'menuitem');
-    item.textContent = `${icon} ${label}`;
+    item.textContent = label;
     menu.append(item);
   }
   return menu;

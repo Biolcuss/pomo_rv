@@ -18,6 +18,7 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Le colonne hanno un'altezza minima, così restano ampie anche se vuote
 - Aggiungere, modificare ed eliminare task
 - **Tag** personalizzabili e colorati (es. lavoro, casa, urgente, 5 minuti): una task può averne più di uno
+- Colori dei tag scelti da una palette di 9 colori; la colonna Completate è visivamente "oscurata" (anche nel tema scuro)
 - Pannello laterale (cassetto da destra, non sposta il kanban) per creare/eliminare tag e mostrare solo le task con certi tag
 - Le task e i tag restano salvati anche chiudendo il browser
 

@@ -13,7 +13,21 @@ const closeButton = document.getElementById('tags-close');
 const panel = document.getElementById('tags-panel');
 const form = document.getElementById('tag-form');
 const nameInput = document.getElementById('tag-name');
-const colorInput = document.getElementById('tag-color');
+const colorPicker = document.getElementById('tag-colors');
+
+// Palette dei colori disponibili per i tag (il primo è quello selezionato di default).
+// Per aggiungere o cambiare colori basta modificare questa lista.
+const PALETTE = [
+  { name: 'Blu', value: '#3b82f6' },
+  { name: 'Verde', value: '#3fa66a' },
+  { name: 'Rosso', value: '#e5484d' },
+  { name: 'Arancione', value: '#f08a24' },
+  { name: 'Giallo', value: '#e5b800' },
+  { name: 'Turchese', value: '#14a3a3' },
+  { name: 'Viola', value: '#8b5cf6' },
+  { name: 'Rosa', value: '#ec4899' },
+  { name: 'Grigio', value: '#6b7785' },
+];
 const tagList = document.getElementById('tag-list');
 const clearButton = document.getElementById('filter-clear');
 
@@ -81,6 +95,29 @@ function renderPanel() {
     activeFilter.size > 0 ? `Tag e filtri (${activeFilter.size})` : 'Tag e filtri';
 }
 
+// Crea i pallini colorati: ognuno è un "radio button" (se ne sceglie uno solo)
+// nascosto, con accanto un cerchio colorato che fa da aspetto grafico.
+function renderColorPicker() {
+  PALETTE.forEach((color, index) => {
+    const label = document.createElement('label');
+    label.className = 'swatch';
+    label.title = color.name;
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'tag-color';
+    radio.value = color.value;
+    radio.checked = index === 0;
+    radio.setAttribute('aria-label', color.name);
+
+    const circle = document.createElement('span');
+    circle.style.setProperty('--swatch', color.value);
+
+    label.append(radio, circle);
+    colorPicker.append(label);
+  });
+}
+
 // Apre/chiude il cassetto laterale. La classe "open" lo fa scorrere dentro la pagina
 // (vedi il CSS); `inert` impedisce di raggiungere i suoi campi con Tab quando è chiuso.
 function setPanelOpen(open) {
@@ -96,6 +133,7 @@ function setPanelOpen(open) {
 // countUsage(id): quante task usano quel tag
 // onTagDeleted(id): todo.js toglie il tag dalle task
 export function initTags({ onChange, countUsage, onTagDeleted }) {
+  renderColorPicker();
   renderPanel();
 
   toggleButton.addEventListener('click', () => {
@@ -121,7 +159,8 @@ export function initTags({ onChange, countUsage, onTagDeleted }) {
       nameInput.reportValidity();
       return;
     }
-    tags.push({ id: crypto.randomUUID(), name, color: colorInput.value });
+    const color = form.querySelector('input[name="tag-color"]:checked').value;
+    tags.push({ id: crypto.randomUUID(), name, color });
     save('tags', tags);
     nameInput.value = '';
     renderPanel();

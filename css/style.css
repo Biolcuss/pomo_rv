@@ -11,6 +11,8 @@
   --border: #dde1e6;
   --accent: #e4572e;        /* rosso "pomodoro" */
   --accent-text: #ffffff;
+  --done-column: #e1e4e8;   /* colonna "Completate": più scura delle altre */
+  --done-item: #eceef1;     /* task completate: più scure delle task normali */
   --radius: 12px;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -22,6 +24,8 @@
   --text: #e8eaed;
   --text-muted: #9aa4b1;
   --border: #323944;
+  --done-column: #0d0f12;
+  --done-item: #171a1f;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
@@ -197,14 +201,43 @@ input[type="text"] {
   min-width: 10rem;
 }
 
-.tag-form input[type="color"] {
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0.15rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+/* Palette colori: una riga di pallini; il radio vero è nascosto ma resta usabile da tastiera */
+.color-picker {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.swatch {
+  position: relative;
   cursor: pointer;
+}
+
+.swatch input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.swatch span {
+  display: block;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--swatch);
+}
+
+/* Pallino scelto: anello attorno */
+.swatch input:checked + span {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+}
+
+.swatch input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
 }
 
 .hint {
@@ -288,6 +321,11 @@ button.tag {
   border: 2px solid transparent;
   border-radius: var(--radius);
   padding: 0.75rem;
+}
+
+/* Colonna "Completate" oscurata rispetto alle altre */
+.kanban-column[data-status="done"] {
+  background: var(--done-column);
 }
 
 /* Colonna evidenziata mentre ci si trascina sopra una task */
@@ -439,6 +477,10 @@ button.tag {
   width: 2rem;
   height: 2rem;
   font-size: 0.9rem;
+}
+
+.todo-item.done {
+  background: var(--done-item);
 }
 
 .todo-item.done .todo-text {

@@ -48,8 +48,9 @@
         </div>
         <form id="tag-form" class="tag-form">
           <input id="tag-name" type="text" placeholder="Nuovo tag (es. lavoro)" maxlength="20" autocomplete="off" required>
-          <input id="tag-color" type="color" value="#4f8cff" aria-label="Colore del tag">
           <button type="submit" class="button primary">Crea tag</button>
+          <!-- I pallini colorati vengono creati da js/tags.js (palette limitata) -->
+          <div id="tag-colors" class="color-picker" role="radiogroup" aria-label="Colore del tag"></div>
         </form>
         <p class="hint">Clicca un tag per filtrare le task: vedrai solo quelle che hanno tutti i tag selezionati.</p>
         <div id="tag-list" class="tag-list"></div>
