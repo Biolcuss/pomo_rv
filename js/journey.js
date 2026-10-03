@@ -1,5 +1,6 @@
-// Scena in ASCII art accanto al timer: un camper che viaggia dal punto A al punto B.
-// - Lavoro: il camper avanza sulla strada in base al progresso del pomodoro.
+// Scena in ASCII art accanto al timer: un camper in viaggio.
+// - Lavoro: il camper è fermo (un po' a sinistra) e la strada scorre, così sembra in viaggio;
+//   la strada si colora da sinistra a destra con il progresso del pomodoro (0% → 100%).
 // - Pausa: il camper è parcheggiato in campeggio, con montagne, falò e stelle.
 //
 // Come funziona il disegno: una "tela" è una griglia di celle { ch, cls } (carattere + colore).
@@ -7,7 +8,14 @@
 // poi la tela diventa HTML: ogni gruppo di celle dello stesso colore è uno <span>.
 
 const W = 64;   // colonne
-const H = 13;   // righe
+const H = 20;   // righe
+const HORIZON_ROW = 10;   // riga dove finiscono le montagne in lontananza
+const ROAD_ROW = 17;      // riga della strada (bordo vicino) sotto le ruote del camper
+// Orizzonte e strada sono uguali nella scena di viaggio e in quella del campeggio:
+// il camper resta sempre alla stessa altezza. Tra orizzonte e primo piano c'è spazio vuoto,
+// così lo sfondo si stacca.
+const CAMPER_Y = ROAD_ROW - 3;
+const CAMPER_X = 16;   // posizione del camper nel viaggio: un po' a sinistra del centro
 
 const artEl = document.getElementById('scene-art');
 const sceneEl = document.getElementById('scene-section');
@@ -20,9 +28,9 @@ let frame = 0;
 // ---------- Sprite ----------
 // "W" nelle ruote viene sostituito dal carattere del fotogramma (la ruota gira).
 const CAMPER = [
-  " .--------.__  ",
-  " | [] []  |  '.",
-  " '-(W)----(W)-'",
+  " .-------.__",
+  " | [] [] | '.",
+  " '-(W)--(W)-'",
 ];
 const CAMPER_W = Math.max(...CAMPER.map((line) => line.length));
 const WHEEL_FRAMES = ['-', '\\', '|', '/'];
@@ -38,30 +46,50 @@ const CLOUD = [
   '.(    ).',
   '(___.__)',
 ];
-const FAR_HILLS = [
-  '                 /\\                                 /\\         ',
-  '        /\\      /  \\            /\\                 /  \\    /\\  ',
-  '       /  \\    /    \\    /\\    /  \\       /\\      /    \\  /  \\ ',
-  '  /\\  /    \\  /      \\  /  \\  /    \\     /  \\    /      \\/    \\',
-  ' /  \\/      \\/        \\/    \\/      \\___/    \\__/             ',
+// Punte dei pini in primo piano: passano davanti alla strada e coprono al massimo le ruote
+const FG_TREE = [
+  '   ^   ',
+  '  /^\\  ',
+  ' /^^^\\ ',
+  '/^^^^^\\',
 ];
-const FLAG_A = ['A ', '|>', '| ', '| '];
-const FLAG_B = [' B', '|>', '| ', '| '];
+const FG_TREE_SMALL = [
+  '  ^  ',
+  ' /^\\ ',
+  '/^^^\\',
+];
+// Posizione di partenza di ogni pino lungo un "giro" di FG_PERIOD colonne:
+// il giro è più largo della scena, così ogni tanto non passa nessun albero.
+const FG_PERIOD = W + 30;
+const FG_TREES = [
+  { x: 10, sprite: FG_TREE },
+  { x: 18, sprite: FG_TREE_SMALL },
+  { x: 60, sprite: FG_TREE },
+];
 
-const MOUNTAINS = [
-  '                       /\\                                       ',
-  '             /\\       /  \\                   /\\                 ',
-  '            /  \\     / /\\ \\        /\\       /  \\       /\\       ',
-  '      /\\   / /\\ \\   / /  \\ \\      /  \\     / /\\ \\     /  \\      ',
-  '     /  \\ / /  \\ \\ / /    \\ \\    / /\\ \\   / /  \\ \\   / /\\ \\     ',
-  '    / /\\ \\ /    \\ / /      \\ \\  / /  \\ \\ / /    \\ \\ / /  \\ \\    ',
-  '___/_/__\\_\\______\\_/________\\_\\/_/____\\_\\_/______\\_\\_/____\\_\\___',
+// Montagne: la stessa catena in entrambe le scene. Ogni cima è un triangolo di / e \
+// (c = colonna del lato sinistro della punta, h = altezza in righe). Le cime si toccano
+// solo alla base formando una valle "\/", senza cime piccole dentro quelle grandi
+// e senza una riga di base che faccia da orizzonte.
+const MOUNTAIN_ROWS = 5;
+const PEAKS = [
+  { c: 6, h: 3 }, { c: 14, h: 5 }, { c: 23, h: 4 }, { c: 32, h: 5 },
+  { c: 40, h: 3 }, { c: 48, h: 5 }, { c: 57, h: 4 },
 ];
-const MOON = [
-  '  _.',
-  ' /  |',
-  ' \\__|',
-];
+
+function buildMountains() {
+  const rows = Array.from({ length: MOUNTAIN_ROWS }, () => Array(W).fill(' '));
+  for (const { c, h } of PEAKS) {
+    for (let k = 0; k < h; k++) {
+      const row = MOUNTAIN_ROWS - h + k;
+      rows[row][c - k] = '/';
+      rows[row][c + 1 + k] = '\\';
+    }
+  }
+  return rows.map((row) => row.join(''));
+}
+
+const MOUNTAINS = buildMountains();
 const PINE = [
   '  ^  ',
   ' /^\\ ',
@@ -84,7 +112,7 @@ const SMOKE_FRAMES = [
   ['o  ', '  .', ' o '],
   [' . ', 'o  ', '  o'],
 ];
-const STARS = [[3, 0], [11, 1], [19, 0], [31, 0], [38, 1], [45, 0], [61, 1], [7, 2], [29, 2]];
+const STARS = [[3, 0], [11, 1], [19, 0], [31, 0], [38, 2], [45, 0], [61, 1], [7, 3], [29, 2], [52, 2], [16, 2], [58, 3], [41, 1], [25, 0]];
 const STAR_FRAMES = ['*', '+', '.', '*'];
 
 // ---------- Tela ----------
@@ -141,47 +169,79 @@ function camperSprite(wheel) {
   return CAMPER.map((line) => line.replaceAll('W', wheel));
 }
 
-// Lavoro: strada da A a B, il camper avanza con il progresso del pomodoro.
-function drawRoad(canvas) {
-  stamp(canvas, SUN, W - 9, 0, 'c-amb');
-  // Le nuvole scorrono all'indietro mentre si viaggia
-  stamp(canvas, CLOUD, mod(8 - frame, W + 8) - 8, 1, 'c-mut');
-  stamp(canvas, CLOUD, mod(36 - frame, W + 8) - 8, 3, 'c-mut');
-  stamp(canvas, FAR_HILLS, 0, 4, 'c-dim');
+// Colori: tutta la scena ha il colore base del tema; l'ambra (c-amb) serve solo a staccare
+// pochi elementi: nel viaggio il camper, il suo fumo, il sole e la strada già percorsa;
+// nel campeggio il falò (con il suo fumo), il camper e le stelle.
 
-  stamp(canvas, FLAG_A, 1, 7, 'c-txt');
-  stamp(canvas, FLAG_B, W - 3, 7, 'c-amb');
+// Elementi di sfondo e primo piano uguali nelle due scene (così restano coerenti).
+// `shift` li fa scorrere nel viaggio; nel campeggio è 0 e stanno fermi.
 
-  // Strada e linee di mezzeria che scorrono
-  stamp(canvas, ['='.repeat(W)], 0, 11, 'c-mut');
-  stamp(canvas, [Array.from({ length: W }, (_, i) => ((i + frame) % 4 < 2 ? '-' : ' ')).join('')], 0, 12, 'c-dim');
-
-  const start = 3;
-  const end = W - 4 - CAMPER_W;
-  const x = start + Math.round(state.progress * (end - start));
-  if (state.running) stamp(canvas, [EXHAUST_FRAMES[frame % EXHAUST_FRAMES.length]], x - 2, 10, 'c-mut');
-  stamp(canvas, camperSprite(WHEEL_FRAMES[frame % WHEEL_FRAMES.length]), x, 8, 'c-acc', true);
+// Bordo lontano della carreggiata: linea con i paletti, all'altezza ROAD_ROW - 4
+function farEdgeLine(shift) {
+  return Array.from({ length: W }, (_, i) => ((i + shift) % 12 === 0 ? '|' : '_')).join('');
 }
 
-// Pausa: campeggio in montagna.
+// Erba in primo piano, sotto la strada (due righe)
+function drawGrass(canvas, shift) {
+  const rows = [
+    (i) => ".,'"[mod((i + shift) * 7, 3)],
+    (i) => " ,'."[mod((i + shift) * 5, 4)],
+  ];
+  rows.forEach((pick, index) => {
+    stamp(canvas, [Array.from({ length: W }, (_, i) => pick(i)).join('')], 0, ROAD_ROW + 1 + index, 'c-dim');
+  });
+}
+
+// Lavoro: il camper è fermo (un po' a sinistra), è la strada a scorrere. La strada si colora
+// d'ambra da sinistra a destra con il progresso del pomodoro: all'avvio 0%, a fine pomodoro tutta colorata.
+function drawRoad(canvas) {
+  stamp(canvas, SUN, W - 9, 1, 'c-amb');
+  // Le nuvole scorrono piano (sono lontane); la strada e gli alberi in primo piano più veloci
+  const cloudShift = Math.floor(frame / 2);
+  stamp(canvas, CLOUD, mod(8 - cloudShift, W + 8) - 8, 0, 'c-mut');
+  stamp(canvas, CLOUD, mod(36 - cloudShift, W + 8) - 8, 1, 'c-mut');
+  stamp(canvas, MOUNTAINS, 0, HORIZON_ROW - MOUNTAIN_ROWS + 1, 'c-dim');
+
+  // Carreggiata: bordo lontano con i paletti, linea di mezzeria, bordo vicino
+  const centerLine = Array.from({ length: W }, (_, i) => ((i + frame) % 4 < 2 ? '-' : ' ')).join('');
+  const roadRows = [[farEdgeLine(frame), ROAD_ROW - 4], [centerLine, ROAD_ROW - 2], ['='.repeat(W), ROAD_ROW]];
+  const done = Math.round(state.progress * W);   // colonne già "percorse"
+  for (const [line, row] of roadRows) {
+    stamp(canvas, [line], 0, row, 'c-mut');
+    stamp(canvas, [line.slice(0, done)], 0, row, 'c-amb');
+  }
+  drawGrass(canvas, frame * 2);
+
+  const x = CAMPER_X;
+  if (state.running) stamp(canvas, [EXHAUST_FRAMES[frame % EXHAUST_FRAMES.length]], x - 2, ROAD_ROW - 1, 'c-amb');
+  stamp(canvas, camperSprite(WHEEL_FRAMES[frame % WHEEL_FRAMES.length]), x, CAMPER_Y, 'c-amb', true);
+
+  // Punte dei pini in primo piano: scorrono al doppio della velocità della strada
+  for (const tree of FG_TREES) {
+    const treeX = mod(tree.x - frame * 2, FG_PERIOD) - 7;
+    stamp(canvas, tree.sprite, treeX, H - tree.sprite.length, 'c-txt');
+  }
+}
+
+// Pausa: campeggio in montagna, con la stessa strada, lo stesso orizzonte e la stessa erba della scena di viaggio.
 function drawCamp(canvas) {
   STARS.forEach(([x, y], index) => {
-    stamp(canvas, [STAR_FRAMES[(frame + index) % STAR_FRAMES.length]], x, y, 'c-mut');
+    stamp(canvas, [STAR_FRAMES[(frame + index) % STAR_FRAMES.length]], x, y, 'c-amb');
   });
-  stamp(canvas, MOON, W - 9, 0, 'c-amb');
-  stamp(canvas, MOUNTAINS, 0, 1, 'c-dim');
+  stamp(canvas, MOUNTAINS, 0, HORIZON_ROW - MOUNTAIN_ROWS + 1, 'c-dim');
+  stamp(canvas, [farEdgeLine(0)], 0, ROAD_ROW - 4, 'c-mut');
 
-  stamp(canvas, PINE, 1, 8, 'c-acc');
-  stamp(canvas, PINE, 7, 8, 'c-acc');
-  stamp(canvas, TENT, 14, 9, 'c-txt');
-  stamp(canvas, SMOKE_FRAMES[frame % SMOKE_FRAMES.length], 26, 5, 'c-mut');
-  stamp(canvas, FIRE_FRAMES[frame % FIRE_FRAMES.length], 25, 8, 'c-amb');
-  stamp(canvas, LOGS, 25, 11, 'c-txt');
-  stamp(canvas, camperSprite('-'), 36, 9, 'c-acc', true);
-  stamp(canvas, PINE, W - 6, 8, 'c-acc');
+  stamp(canvas, PINE, 1, ROAD_ROW - 4, 'c-acc');
+  stamp(canvas, PINE, 7, ROAD_ROW - 4, 'c-acc');
+  stamp(canvas, TENT, 14, CAMPER_Y, 'c-txt');
+  stamp(canvas, SMOKE_FRAMES[frame % SMOKE_FRAMES.length].slice(0, 2), 31, ROAD_ROW - 6, 'c-amb');
+  stamp(canvas, FIRE_FRAMES[frame % FIRE_FRAMES.length], 30, ROAD_ROW - 4, 'c-amb');
+  stamp(canvas, LOGS, 30, ROAD_ROW - 1, 'c-amb');
+  stamp(canvas, camperSprite('-'), 37, CAMPER_Y, 'c-amb', true);
+  stamp(canvas, PINE, W - 6, ROAD_ROW - 4, 'c-acc');
 
-  // Erba
-  stamp(canvas, [Array.from({ length: W }, (_, i) => ".,'"[(i * 7) % 3]).join('')], 0, 12, 'c-dim');
+  stamp(canvas, ['='.repeat(W)], 0, ROAD_ROW, 'c-mut');
+  drawGrass(canvas, 0);
 }
 
 function mod(n, m) {
@@ -197,7 +257,7 @@ function draw() {
   sceneEl.dataset.scene = camping ? 'camp' : 'road';
   sceneEl.setAttribute('aria-label', camping
     ? 'Pausa: il camper è parcheggiato in campeggio'
-    : `Viaggio del camper dal punto A al punto B: ${Math.round(state.progress * 100)}%`);
+    : `Il camper è in viaggio: ${Math.round(state.progress * 100)}% del percorso`);
 }
 
 // ---------- Interfaccia per timer.js ----------
@@ -210,7 +270,7 @@ export function updateJourney(next) {
 }
 
 // Avvia l'animazione: la scena si muove solo mentre il timer corre (sia in viaggio sia in campeggio).
-// Con "riduci movimento" attivo la scena resta ferma (cambia solo la posizione del camper).
+// Con "riduci movimento" attivo la scena resta ferma (cambia solo la parte colorata della strada).
 export function initJourney() {
   draw();
   setInterval(() => {

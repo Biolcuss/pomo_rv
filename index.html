@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
+  <!-- Applica il tema salvato prima del primo disegno della pagina: niente lampo di colori sbagliati -->
+  <script>
+    try {
+      var theme = JSON.parse(localStorage.getItem("focusApp.theme"));
+      if (!theme) theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {}
+  </script>
   <title>Biolcuss Focus App</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +58,7 @@
     </section>
 
     <!-- Scena ASCII: il camper va da A a B durante il lavoro, campeggia durante le pause (js/journey.js) -->
-    <section class="scene-window" id="scene-section" role="img" aria-label="Viaggio del camper dal punto A al punto B">
+    <section class="scene-window" id="scene-section" role="img" aria-label="Il camper è in viaggio">
       <pre id="scene-art" class="scene-art" aria-hidden="true"></pre>
     </section>
 

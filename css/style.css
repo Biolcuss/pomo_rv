@@ -38,6 +38,8 @@
   --dial-accent: #a78bfa;     /* anello durante il lavoro */
   --dial-break: #fbbf24;      /* anello durante le pause */
   --dial-btn-text: #140f26;   /* testo del pulsante Avvia sopra l'anello */
+  --scene-ink: #1b1530;       /* colore unico della scena ASCII: il viola scuro del quadrante */
+  --scene-amber: #c47400;     /* ambra: solo per staccare pochi elementi (camper, strada percorsa, fuoco) */
 
   --focus: #6d3fd9;
   --hard-shadow: rgba(76, 40, 170, 0.28);
@@ -68,7 +70,7 @@
   --g1: #4ade80;
   --g2: #2dd4bf;
 
-  --dial: #0c0f0c;
+  --dial: #050605;           /* come la colonna "Completate" */
   --dial-text: #d9eadb;
   --dial-muted: #8fa391;
   --dial-track: #223022;
@@ -76,6 +78,8 @@
   --dial-accent: #4ade80;
   --dial-break: #fbbf24;
   --dial-btn-text: #052e12;
+  --scene-ink: #4ade80;       /* nel tema scuro: il verde principale */
+  --scene-amber: #fbbf24;
 
   --focus: #4ade80;
   --hard-shadow: rgba(0, 0, 0, 0.7);
@@ -213,48 +217,30 @@ input {
 }
 
 /* ==========================================================
-   Scena ASCII del camper: una "finestra di terminale" scura come il quadrante
+   Scena ASCII del camper: niente pannello, il disegno sta direttamente
+   sullo sfondo della pagina e usa i colori del tema
    ========================================================== */
 .scene-window {
-  --win-bg: var(--dial);
-  --win-border: linear-gradient(var(--dial-line), var(--dial-line));
   display: flex;
   flex-direction: column;
+  align-self: stretch;     /* alta quanto il timer */
   min-width: 0;
-  padding: 1.25rem;
-  border-radius: 12px;
-  box-shadow: 6px 6px 0 var(--hard-shadow);
-  color: var(--dial-text);
-  container-type: inline-size;   /* il disegno si adatta alla larghezza della finestra */
+  container-type: inline-size;   /* il disegno si adatta alla larghezza disponibile */
 }
 
-.scene-window:hover {
-  --win-border: linear-gradient(135deg, var(--g1), var(--g2));
-}
-
-/* 64 colonne di caratteri: la dimensione del font segue la larghezza della finestra
+/* 64 colonne di caratteri: la dimensione del font segue la larghezza disponibile
    (JetBrains Mono: ogni carattere è largo 0,6 em → 64 × 0,6 = 38,4 em) */
 .scene-art {
   width: max-content;
   max-width: 100%;
-  margin: auto;            /* centrato in orizzontale e in verticale nella finestra */
+  margin: auto;            /* centrato in orizzontale e in verticale */
   font-family: var(--font);
   font-size: min(calc(100cqi / 39), 1.15rem);
   line-height: 1.2;
-  color: var(--dial-text);
+  color: var(--scene-ink);   /* colore base di tutta la scena; l'ambra è solo per pochi elementi */
   overflow: hidden;
 }
-
-.scene-art .c-acc { color: var(--dial-accent); }
-.scene-art .c-amb { color: var(--dial-break); }
-.scene-art .c-txt { color: var(--dial-text); }
-.scene-art .c-mut { color: var(--dial-muted); }
-.scene-art .c-dim { color: color-mix(in srgb, var(--dial-muted) 45%, var(--dial)); }
-
-/* In campeggio le montagne sono più presenti */
-.scene-window[data-scene="camp"] .c-dim {
-  color: color-mix(in srgb, var(--dial-muted) 65%, var(--dial));
-}
+.scene-art .c-amb { color: var(--scene-amber); }
 
 /* ==========================================================
    Pulsanti e campi di testo
@@ -354,7 +340,6 @@ input[type="text"]::placeholder {
    Il trucco: due sfondi, uno pieno dentro il bordo e un gradiente dietro.
    ========================================================== */
 .dial-plate,
-.scene-window,
 .kanban-column,
 .tags-panel {
   border: 2px solid transparent;
