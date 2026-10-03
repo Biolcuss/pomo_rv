@@ -1,4 +1,4 @@
-# Focus App — Documento di progetto
+# ~/pomo_rv (Focus App) — Documento di progetto
 
 > Questo file raccoglie le decisioni prese, lo stato di avanzamento e le idee per il futuro.
 > Viene aggiornato al termine di ogni tappa.
@@ -27,7 +27,17 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Cicli automatici: lavoro → pausa breve → … → pausa lunga ogni N cicli
 - Durate personalizzabili (cursore 1–90 minuti + campo numerico) in un pannello laterale aperto dal pulsante ⋯, nei colori "pomodoro": lavoro, pausa breve, pausa lunga, cicli prima della pausa lunga. Le modifiche valgono solo premendo **Salva** (che resetta il timer); chiudendo il pannello si scartano
 - Preimpostazioni delle durate: una di fabbrica ("Classico" 25/5/15/4) e quelle create dall'utente (con nome), caricabili con un clic ed eliminabili
-- Suono e notifica del browser a fine sessione
+- Suono (generato con Web Audio, niente file) e notifica del browser a fine fase, con un campanello diverso per fine lavoro e fine pausa. Interruttore suono nell'intestazione (scelta ricordata); la notifica compare solo se la scheda non è in primo piano
+
+### Reward system
+- Task: i punti li sceglie l'utente per ogni task con uno slider nel menu ⋯ (valori +5, +10, +15, +25, +50, +75, +100; default +10, mostrati anche accanto alla task). Si ottengono una sola volta, quando la task entra in Completate: riportarla indietro e rimetterla non dà altri punti, e l'etichetta dei punti appare oscurata e barrata. Cambiando il valore con lo slider i punti tornano ottenibili
+- Pomodoro: **1 punto per ogni minuto** di lavoro, assegnato quando il timer finisce da solo (le pause e il tasto Salta non danno nulla)
+- Nell'intestazione: punti, livello (uno ogni 100 punti) e barra di avanzamento; "+N" che sale a ogni premio. Anche la task appena completata si anima, partendo dall'etichetta dei punti: etichetta che si ingrandisce, lampo del bordo e scintille (niente numero che sale), più un "ding". L'effetto è **proporzionale ai punti** (+5 leggero, senza scintille; +100 esagerato: alone, ingrandimento e durata maggiori, 12 scintille)
+- Suoni (tutti sintetizzati, spegnibili con il pulsante audio): "ding" per la task completata, uno grave e morbido per lo spostamento di colonna, uno per task aggiunta e uno per task eliminata, uno per "Salta", vibrazione e ritorno in To-do delle task ripetibili, avvio/pausa/reset del timer, campanelli di fine fase. L'audio si sblocca al primo clic o tasto premuto sulla pagina (i browser lo richiedono)
+- Task **ripetibile** (interruttore nel menu ⋯, segnalata da ↻ accanto ai punti): completata, dopo l'animazione vibra e torna in fondo a To-do, dove può dare di nuovo i punti (succede ogni volta che entra in Completate, anche se i punti erano già stati incassati)
+- Pulsante ✕ sulla task (a destra dei tre puntini) per eliminarla; diventa rosso al passaggio del mouse
+- Pulsante impostazioni (ingranaggio) nell'intestazione: pannello laterale con aggiunta/rimozione di punti e reset di livello e punti, per testare il sistema
+- Salvati nel browser (`rewards`)
 
 ### Generale
 - Pagina unica: in alto timer (quadrante scuro con anello che si svuota) e accanto la scena ASCII del viaggio; sotto il kanban a tutta larghezza. Su schermi stretti tutto in colonna
@@ -35,6 +45,7 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Menu della task con "Sposta in…" come alternativa al drag & drop (tastiera e touch)
 - Tema chiaro / scuro selezionabile con un interruttore (la scelta viene ricordata)
 - Estetica "terminale / Hyprland": font JetBrains Mono + Press Start 2P (titolo e cifre del timer), finestre con bordo a gradiente quando sono attive, anello del timer a segmenti. Tema chiaro: bianco + viola (pause in ambra). Tema scuro: nero/grigio + verde fosforo (pause in ambra)
+- Titolo "~/pomo_rv" (come un prompt di terminale) con sottotitolo "Pomodoro e task per restare in carreggiata, un pit stop alla volta."
 - Interfaccia in italiano
 
 ## Decisioni tecniche (e perché)
@@ -61,6 +72,9 @@ Focus App/
 │   ├── tags.js        ← tag colorati e pannello filtri
 │   ├── timer.js       ← logica del Pomodoro timer
 │   ├── journey.js     ← scena ASCII del camper (viaggio e campeggio)
+│   ├── sound.js       ← suoni e notifiche di fine fase
+│   ├── rewards.js     ← punti e livelli
+│   ├── settings.js    ← pannello impostazioni (test dei punti)
 │   ├── theme.js       ← interruttore tema chiaro/scuro
 │   └── main.js        ← avvio dell'app, collega tutti i pezzi
 └── assets/sounds/     ← eventuali suoni
@@ -77,7 +91,8 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 - [x] 5b. **Tag e filtri** — tag colorati, più tag per task, pannello filtri richiudibile
 - [x] 6. **Pomodoro base** — start/pausa/reset/salta e cicli automatici
 - [x] 7. **Impostazioni Pomodoro** — durate e numero di cicli personalizzabili, salvati nel browser
-- [ ] 8. **Suono e notifiche**
+- [x] 8. **Suono e notifiche**
+- [x] 8b. **Reward system** — punti per task e pomodori, livelli
 - [ ] 9. **Rifinitura** — tempo nel titolo della scheda, accessibilità, pulizia
 
 ## Note e limiti noti
@@ -86,7 +101,7 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 
 ## Idee per il futuro (non incluse ora)
 - **Colonne personalizzabili** nel kanban
-- **Reward system**: punti/badge quando si completa una task o si rispetta il timer
+- **Reward**: badge, negozio di ricompense da spendere con i punti, cronologia
 - **Animazione del timer**: anello circolare che si svuota con il tempo
 - **Statistiche**: pomodori completati oggi / in totale
 - **Pubblicazione online**: GitHub Pages o Netlify (gratuiti per siti come questo)

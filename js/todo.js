@@ -4,7 +4,9 @@
 // La colonna in cui sta una task è decisa dal suo campo `status`.
 
 import { load, save } from './storage.js';
-import { initTags, getTags, getTag, getActiveFilter, createTagChip } from './tags.js';
+import { playSound } from './sound.js';
+import { rewardTask, effectDuration, TASK_POINTS, DEFAULT_TASK_POINTS } from './rewards.js';
+import { initTags,getTags, getTag, getActiveFilter, createTagChip } from './tags.js';
 
 const kanban = document.querySelector('.kanban');
 
@@ -15,7 +17,10 @@ for (const status of STATUSES) {
   lists[status] = kanban.querySelector(`[data-status="${status}"] .todo-list`);
 }
 
-// Ogni task è un oggetto: { id, text, status, tags, createdAt }
+// Ogni task è un oggetto: { id, text, status, tags, createdAt, points, rewarded, repeat }
+// `points` = punti che dà al completamento (scelti dal menu della task);
+// `rewarded` = quei punti sono già stati assegnati;
+// `repeat` = task ripetibile: una volta completata torna da sola in To-do.
 // `tags` è una lista di id di tag (vedi tags.js).
 let tasks = migrate(load('tasks', []));
 let editingId = null;   // id della task di cui si sta modificando il testo
@@ -33,6 +38,10 @@ function migrate(savedTasks) {
       ...rest,
       status: task.status ?? (done ? 'done' : 'todo'),
       tags: task.tags ?? [],
+      points: task.points ?? DEFAULT_TASK_POINTS,
+      repeat: task.repeat ?? false,
+      // Le task già completate prima dei premi non devono darne retroattivamente
+      rewarded: task.rewarded ?? (task.status ?? (done ? 'done' : 'todo')) === 'done',
     };
   });
 }
@@ -77,12 +86,24 @@ function createTaskElement(task) {
     main.append(editInput);
     setTimeout(() => editInput.focus(), 0);   // dopo che è stato inserito nella pagina
   } else {
-    li.draggable = true;   // rende la task trascinabile
+    // Trascinabile, tranne a menu aperto: altrimenti trascinare lo slider dei punti sposterebbe la task
+    li.draggable = task.id !== menuId;
 
     const text = document.createElement('span');
     text.className = 'todo-text';
     text.textContent = task.text;   // textContent è sicuro: non interpreta HTML
-    main.append(text, createActionButton('menu', '⋯', 'Azioni sulla task'));
+
+    const points = document.createElement('span');
+    points.className = 'points-badge';
+    points.textContent = badgeText(task);
+    points.title = task.repeat ? 'Punti al completamento (task ripetibile)' : 'Punti al completamento';
+    // Punti già incassati e task fuori da Completate: non valgono più nulla, etichetta oscurata
+    points.classList.toggle('spent', isSpent(task));
+    if (isSpent(task)) points.title = 'Punti già incassati: cambia il valore per poterli riottenere';
+
+    const remove = createActionButton('delete', '✕', 'Elimina task');
+    remove.classList.add('danger');
+    main.append(text, points, createActionButton('menu', '⋯', 'Azioni sulla task'), remove);
   }
   li.append(main);
 
@@ -108,7 +129,17 @@ function createTaskElement(task) {
   return li;
 }
 
-const STATUS_LABELS = { todo: 'To-do', doing: 'In corso', done: 'Completate' };
+function isSpent(task) {
+  // Boolean(): le task nuove non hanno `rewarded`, e toggle(classe, undefined) invertirebbe la classe invece di toglierla
+  return Boolean(task.rewarded) && task.status !== 'done';
+}
+
+// Testo dell'etichetta dei punti: ↻ davanti se la task è ripetibile
+function badgeText(task) {
+  return `${task.repeat ? '↻ ' : ''}+${task.points}`;
+}
+
+const STATUS_LABELS ={ todo: 'To-do', doing: 'In corso', done: 'Completate' };
 
 // Il menu include "Sposta in…": un'alternativa al drag & drop, utile da tastiera e su touchscreen.
 function createTaskMenu(task) {
@@ -121,8 +152,27 @@ function createTaskMenu(task) {
   const groups = [
     [['edit', 'Modifica'], ['tag', 'Tag']],
     moves,
-    [['delete', 'Elimina']],
   ];
+
+  // Slider dei punti: sceglie uno dei valori di TASK_POINTS (l'indice dello slider, non il valore)
+  const pointsRow = document.createElement('label');
+  pointsRow.className = 'points-row';
+  const pointsLabel = document.createElement('span');
+  pointsLabel.textContent = 'Punti: ';
+  const pointsValue = document.createElement('strong');
+  pointsValue.textContent = `+${task.points}`;
+  pointsLabel.append(pointsValue);
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.className = 'points-slider';
+  slider.dataset.role = 'points';
+  slider.min = 0;
+  slider.max = TASK_POINTS.length - 1;
+  slider.step = 1;
+  slider.value = Math.max(0, TASK_POINTS.indexOf(task.points));
+  slider.setAttribute('aria-label', 'Punti al completamento');
+  slider.setAttribute('aria-valuetext', `+${task.points} punti`);
+  pointsRow.append(pointsLabel, slider);
 
   groups.forEach((group, index) => {
     if (index > 0) {
@@ -141,6 +191,26 @@ function createTaskMenu(task) {
       menu.append(item);
     }
   });
+
+  const divider = document.createElement('div');
+  divider.className = 'menu-divider';
+  divider.setAttribute('role', 'separator');
+  // Interruttore "Ripetibile"
+  const repeat = document.createElement('button');
+  repeat.type = 'button';
+  repeat.className = 'menu-item switch-item';
+  repeat.dataset.action = 'toggle-repeat';
+  repeat.setAttribute('role', 'menuitemcheckbox');
+  repeat.setAttribute('aria-checked', String(task.repeat));
+  repeat.title = 'Una volta completata, torna in To-do e può dare di nuovo i punti';
+  const repeatLabel = document.createElement('span');
+  repeatLabel.textContent = 'Ripetibile';
+  const track = document.createElement('span');
+  track.className = 'switch';
+  track.setAttribute('aria-hidden', 'true');
+  repeat.append(repeatLabel, track);
+
+  menu.append(divider, repeat, pointsRow);
   return menu;
 }
 
@@ -189,15 +259,18 @@ function addTask(text, status) {
     status,
     // Se un filtro è attivo, la nuova task prende quei tag: altrimenti sparirebbe subito
     tags: getActiveFilter(),
+    points: DEFAULT_TASK_POINTS,
     createdAt: Date.now(),
   });
   saveAndRender();
+  playSound('add');
 }
 
 function deleteTask(id) {
   tasks = tasks.filter((t) => t.id !== id);
   if (taggingId === id) taggingId = null;
   saveAndRender();
+  playSound('delete');
 }
 
 function toggleTaskTag(taskId, tagId) {
@@ -213,7 +286,11 @@ function toggleTaskTag(taskId, tagId) {
 function moveTask(id, status, beforeId) {
   const task = tasks.find((t) => t.id === id);
   tasks = tasks.filter((t) => t.id !== id);
+  const changedColumn = task.status !== status;
   task.status = status;
+  // Premio una sola volta per task: riportarla indietro e rimetterla in Completate non dà altri punti
+  const earns = status === 'done' && !task.rewarded;
+  if (earns) task.rewarded = true;
   const index = beforeId ? tasks.findIndex((t) => t.id === beforeId) : -1;
   if (index === -1) {
     tasks.push(task);
@@ -221,6 +298,38 @@ function moveTask(id, status, beforeId) {
     tasks.splice(index, 0, task);
   }
   saveAndRender();
+  // Cambio di colonna: suono di spostamento (se dà punti suona già il "ding" del premio)
+  if (changedColumn && !earns) playSound('move');
+  if (earns) {
+    // La task è stata ridisegnata: l'animazione va sul nuovo elemento (null se un filtro la nasconde)
+    const el = kanban.querySelector(`.todo-item[data-id="${id}"]`);
+    rewardTask(task.points, el);
+  }
+  // Ripetibile: torna in To-do ogni volta che entra in Completate, anche se non dà punti
+  // (senza premio non c'è animazione da aspettare, basta una breve pausa)
+  if (changedColumn && status === 'done' && task.repeat) {
+    scheduleRepeat(id, earns ? effectDuration(task.points) : 400);
+  }
+}
+
+// Task ripetibile: finita l'animazione dei punti vibra, poi torna in fondo a To-do
+// e può dare di nuovo i punti.
+function scheduleRepeat(id, delay) {
+  setTimeout(() => {
+    kanban.querySelector(`.todo-item[data-id="${id}"]`)?.classList.add('shaking');
+    playSound('shake');
+    setTimeout(() => {
+      const task = tasks.find((t) => t.id === id);
+      // Se nel frattempo è stata eliminata, spostata o non è più ripetibile, non si tocca
+      if (!task || task.status !== 'done' || !task.repeat) return;
+      tasks = tasks.filter((t) => t !== task);
+      task.status = 'todo';
+      task.rewarded = false;
+      tasks.push(task);
+      saveAndRender();
+      playSound('return');
+    }, 500);
+  }, delay);
 }
 
 // Conferma la modifica. Se il testo è vuoto, mantiene quello vecchio.
@@ -409,11 +518,32 @@ export function initTodo() {
       case 'toggle-tag':
         toggleTaskTag(id, button.dataset.tagId);
         break;
+      case 'toggle-repeat': {   // il menu resta aperto, così si vede l'interruttore cambiare
+        const task = tasks.find((t) => t.id === id);
+        task.repeat = !task.repeat;
+        saveAndRender();
+        break;
+      }
       default:
         // "Sposta in…": la task va in fondo alla colonna scelta
         if (action.startsWith('move-')) moveTask(id, action.slice(5), null);
         break;
     }
+  });
+
+  // Slider dei punti: aggiorna la task mentre lo si trascina. Non si ridisegna (si perderebbe la presa
+  // sullo slider): si cambiano a mano solo le scritte e si salva.
+  kanban.addEventListener('input', (event) => {
+    if (event.target.dataset.role !== 'points') return;
+    const item = event.target.closest('.todo-item');
+    const task = tasks.find((t) => t.id === item.dataset.id);
+    task.points = TASK_POINTS[Number(event.target.value)];
+    task.rewarded = false;   // un nuovo valore dei punti li rende di nuovo ottenibili
+    item.querySelector('.points-badge').classList.remove('spent');
+    item.querySelector('.points-row strong').textContent = `+${task.points}`;
+    item.querySelector('.points-badge').textContent = badgeText(task);
+    event.target.setAttribute('aria-valuetext', `+${task.points} punti`);
+    save('tasks', tasks);
   });
 
   // Clic fuori dal menu (o Esc) lo richiude

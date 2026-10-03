@@ -12,7 +12,7 @@
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {}
   </script>
-  <title>Biolcuss Focus App</title>
+  <title>~/pomo_rv</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..800&family=Press+Start+2P&display=swap">
@@ -22,8 +22,21 @@
   <a class="skip-link" href="#todo-section">Vai alle task</a>
 
   <header class="app-header">
-    <h1 translate="no">Biolcuss Focus App<span class="cursor" aria-hidden="true"></span></h1>
-    <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema"></button>
+    <h1 translate="no">~/pomo_rv<span class="cursor" aria-hidden="true"></span></h1>
+    <p class="tagline">Pomodoro e task per restare in carreggiata, un pit stop alla volta.</p>
+    <div id="reward-widget" class="reward-widget" role="status" aria-label="Punti">
+      <span class="reward-star" aria-hidden="true">★</span>
+      <span id="reward-points">0</span>
+      <span id="reward-level" class="reward-level">Lv 1</span>
+      <span class="reward-track" aria-hidden="true"><span id="reward-bar" class="reward-bar"></span></span>
+    </div>
+    <div class="header-tools">
+      <button id="sound-toggle" class="icon-button" type="button" aria-label="Disattiva i suoni"></button>
+      <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema"></button>
+      <button id="settings-toggle" class="icon-button" type="button" aria-label="Impostazioni" aria-expanded="false" aria-controls="settings-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
   </header>
 
   <main class="layout">
@@ -173,6 +186,33 @@
     <div class="panel-footer">
       <p class="hint">Salvando, il timer torna all'inizio.</p>
       <button id="timer-save" type="button" class="button primary">Salva</button>
+    </div>
+  </aside>
+
+  <!-- Impostazioni generali (js/settings.js): per ora gli strumenti per controllare punti e livello -->
+  <aside id="settings-panel" class="tags-panel timer-panel" aria-label="Impostazioni" inert>
+    <div class="drawer-header">
+      <h2>Impostazioni</h2>
+      <button id="settings-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="panel-body">
+      <section class="panel-section">
+        <h3>Punti e livello</h3>
+        <p id="settings-stats" class="stats-line"></p>
+        <form id="points-form" class="points-form">
+          <label for="points-amount">Quantità</label>
+          <div class="points-form-row">
+            <input id="points-amount" type="number" min="1" max="100000" step="1" value="10" inputmode="numeric" required>
+            <button type="submit" class="button" data-op="add">Aggiungi</button>
+            <button type="submit" class="button" data-op="remove">Rimuovi</button>
+          </div>
+        </form>
+      </section>
+      <section class="panel-section">
+        <h3>Azzera</h3>
+        <p class="hint">Riporta punti, livello e statistiche a zero. Non si può annullare.</p>
+        <button id="rewards-reset" type="button" class="button danger-button">Resetta livello e punti</button>
+      </section>
     </div>
   </aside>
 

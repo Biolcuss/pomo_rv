@@ -171,6 +171,12 @@ input {
   line-height: 1.6;
 }
 
+.tagline {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 /* Cursore da terminale che lampeggia dopo il titolo */
 .cursor {
   display: inline-block;
@@ -186,11 +192,83 @@ input {
   50% { opacity: 0; }
 }
 
-#theme-toggle {
+.header-tools {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Punti e livello, a sinistra dell'intestazione */
+.reward-widget {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.reward-star { color: var(--scene-amber); }
+
+.reward-level {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-muted, inherit);
+}
+
+.reward-track {
+  width: 3.5rem;
+  height: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.reward-bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.4s steps(8);
+}
+
+.reward-widget.level-up { animation: blink 0.3s steps(1) 4; }
+
+.reward-float {
+  position: absolute;
+  left: 1rem;
+  top: 100%;
+  color: var(--scene-amber);
+  pointer-events: none;
+  /* --fx (0..1) è l'intensità: più punti = testo più grande, salita più alta, durata più lunga */
+  font-size: calc(0.9rem + var(--fx, 0) * 1rem);
+  animation: reward-rise calc(1.2s + var(--fx, 0) * 0.8s) ease-out forwards;
+}
+
+@keyframes reward-rise {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(calc(-1.2rem - var(--fx, 0) * 2rem)); }
+}
+
+/* Sotto i 900px barra e livello spariscono (restano i punti) per non toccare il titolo */
+@media (max-width: 900px) {
+  .reward-track, .reward-level { display: none; }
+}
+
+@media (min-width: 901px) {
+  .app-header { padding-inline: 9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-float, .fx-spark, .badge-pop, .reward-widget.level-up,
+  .todo-item.just-rewarded, .todo-item.shaking { animation: none; }
+  .reward-float, .fx-spark { opacity: 0; }
 }
 
 /* ==========================================================
@@ -762,8 +840,168 @@ input[type="text"]::placeholder {
   color: var(--bg);
 }
 
-.menu-item[data-action="delete"]:hover {
+/* Pulsante elimina (✕) sulla task: diventa rosso al passaggio del mouse */
+.icon-button.danger:hover {
   background: var(--danger);
+  border-color: var(--danger);
+  color: var(--surface);
+}
+
+.points-badge {
+  flex: none;
+  margin-right: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--scene-amber);
+}
+
+/* Slider dei punti dentro il menu della task */
+.points-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem 0.5rem;
+  font-size: 0.875rem;
+  cursor: default;
+}
+
+.points-slider {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Feedback sulla task appena completata. Tutto scala con --fx (0 = +5, 1 = +100),
+   impostata da rewards.js: lampo del bordo, etichetta che si ingrandisce, "+N" che sale, scintille. */
+.todo-item.just-rewarded {
+  z-index: 5;   /* l'effetto sporge: deve stare sopra le task vicine */
+  animation: task-flash calc(1s + var(--fx, 0) * 1.2s) steps(8);
+}
+
+@keyframes task-flash {
+  0%, 40% {
+    border-color: var(--scene-amber);
+    box-shadow: 0 0 0 calc(2px + var(--fx, 0) * 6px) var(--scene-amber),
+                0 0 calc(var(--fx, 0) * 28px) var(--scene-amber);
+  }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+
+.points-badge {
+  position: relative;   /* ancora per le scintille */
+}
+
+/* Punti già incassati: la task non vale più nulla finché non si cambia il valore */
+.points-badge.spent {
+  color: var(--text-muted);
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.points-badge.badge-pop {
+  animation: badge-pop calc(0.6s + var(--fx, 0) * 0.6s) ease-out;
+}
+
+@keyframes badge-pop {
+  30% { transform: scale(calc(1.4 + var(--fx, 0) * 1.1)); }
+}
+
+.fx-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: var(--scene-amber);
+  pointer-events: none;
+  animation: fx-burst 0.9s ease-out forwards;
+}
+
+@keyframes fx-burst {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.4); }
+}
+
+/* Vibrazione prima che una task ripetibile torni in To-do */
+.todo-item.shaking {
+  animation: task-shake 0.5s linear;
+}
+
+@keyframes task-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-5px) rotate(-1deg); }
+  30%, 70% { transform: translateX(5px) rotate(1deg); }
+}
+
+/* Interruttore "Ripetibile" nel menu */
+.menu-item.switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.switch {
+  flex: none;
+  width: 2rem;
+  height: 1.05rem;
+  padding: 2px;
+  border: 2px solid var(--border);
+  border-radius: 99px;
+}
+
+.switch::after {
+  content: "";
+  display: block;
+  width: 0.65rem;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.switch-item[aria-checked="true"] .switch {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.switch-item[aria-checked="true"] .switch::after {
+  margin-left: auto;
+  background: var(--accent-text);
+}
+
+/* Pannello impostazioni */
+.stats-line {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.points-form label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.points-form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.points-form-row input {
+  width: 5.5rem;
+  min-width: 0;
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.points-form-row input:focus {
+  border-color: var(--g1);
+}
+
+.danger-button:hover {
+  background: var(--danger);
+  border-color: var(--danger);
   color: var(--surface);
 }
 

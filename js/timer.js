@@ -5,6 +5,8 @@
 
 import { load, save } from './storage.js';
 import { updateJourney } from './journey.js';
+import { unlockAudio, askNotificationPermission, playSound, notify } from './sound.js';
+import { rewardFocus } from './rewards.js';
 
 // Durate in minuti. `cycles` = quanti pomodori di lavoro prima della pausa lunga.
 const DEFAULTS = { work: 25, shortBreak: 5, longBreak: 15, cycles: 4 };
@@ -104,7 +106,20 @@ function render() {
 function tick() {
   remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
   render();
-  if (remaining === 0) nextPhase(true);
+  if (remaining === 0) finishPhase();
+}
+
+// La fase è finita da sola (non saltata): suono, notifica e, per il lavoro, il premio.
+function finishPhase() {
+  if (mode === 'work') {
+    playSound('workEnd');
+    notify('Pomodoro completato!', 'Ottimo lavoro: è ora di fare una pausa.');
+    rewardFocus(settings.work);   // 1 punto per ogni minuto di lavoro
+  } else {
+    playSound('breakEnd');
+    notify('Pausa finita', 'Si torna al lavoro.');
+  }
+  nextPhase(true);
 }
 
 function start() {
@@ -255,9 +270,25 @@ export function initTimer() {
   fillSettingsForm();
   render();
 
-  startButton.addEventListener('click', () => (isRunning() ? pause() : start()));
-  resetButton.addEventListener('click', reset);
-  skipButton.addEventListener('click', () => nextPhase(isRunning()));
+  startButton.addEventListener('click', () => {
+    unlockAudio();
+    askNotificationPermission();
+    if (isRunning()) {
+      pause();
+      playSound('timerPause');
+    } else {
+      start();
+      playSound('timerStart');
+    }
+  });
+  resetButton.addEventListener('click', () => {
+    reset();
+    playSound('timerReset');
+  });
+  skipButton.addEventListener('click', () => {
+    nextPhase(isRunning());
+    playSound('timerSkip');
+  });
 
   settingsToggle.addEventListener('click', () => setPanelOpen(!panel.classList.contains('open')));
   panelClose.addEventListener('click', () => setPanelOpen(false));
