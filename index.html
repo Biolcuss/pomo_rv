@@ -34,27 +34,50 @@
 
     <!-- Sezione To-do list -->
     <section class="card" id="todo-section">
-      <h2>Task</h2>
+      <div class="card-header">
+        <h2>Task</h2>
+        <button id="tags-toggle" type="button" class="button" aria-expanded="false">Tag e filtri</button>
+      </div>
 
-      <form id="todo-form" class="todo-form">
-        <input id="todo-input" type="text" placeholder="Cosa devi fare?" autocomplete="off" required>
-        <button type="submit" class="button primary">Aggiungi</button>
-      </form>
+      <!-- Pannello tag e filtri: chiuso di default (attributo hidden), gestito da js/tags.js -->
+      <div id="tags-panel" class="tags-panel" hidden>
+        <form id="tag-form" class="tag-form">
+          <input id="tag-name" type="text" placeholder="Nuovo tag (es. lavoro)" maxlength="20" autocomplete="off" required>
+          <input id="tag-color" type="color" value="#4f8cff" aria-label="Colore del tag">
+          <button type="submit" class="button primary">Crea tag</button>
+        </form>
+        <p class="hint">Clicca un tag per filtrare le task: vedrai solo quelle che hanno tutti i tag selezionati.</p>
+        <div id="tag-list" class="tag-list"></div>
+        <button id="filter-clear" type="button" class="button small" hidden>Azzera filtri</button>
+      </div>
 
       <!-- Kanban: tre colonne. data-status collega ogni colonna allo stato delle task.
-           Le task vengono create da JavaScript (js/todo.js) dentro ogni <ul>. -->
+           Le task vengono create da JavaScript (js/todo.js) dentro ogni <ul>.
+           In fondo a ogni colonna: pulsante "Aggiungi task" che apre il campo di testo. -->
       <div class="kanban">
         <div class="kanban-column" data-status="todo">
           <h3>To-do <span class="column-count"></span></h3>
           <ul class="todo-list"></ul>
+          <form class="add-form" hidden>
+            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+          </form>
+          <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
         </div>
         <div class="kanban-column" data-status="doing">
           <h3>In corso <span class="column-count"></span></h3>
           <ul class="todo-list"></ul>
+          <form class="add-form" hidden>
+            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+          </form>
+          <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
         </div>
         <div class="kanban-column" data-status="done">
           <h3>Completate <span class="column-count"></span></h3>
           <ul class="todo-list"></ul>
+          <form class="add-form" hidden>
+            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+          </form>
+          <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
         </div>
       </div>
     </section>

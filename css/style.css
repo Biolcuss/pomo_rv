@@ -90,9 +90,13 @@ h1, h2 {
 /* ==========================================================
    Pulsanti e campi di testo
    ========================================================== */
+/* Un elemento con l'attributo hidden sparisce sempre, anche se il CSS gli dà un display */
+[hidden] {
+  display: none !important;
+}
+
 .button,
-.icon-button,
-.filter {
+.icon-button {
   font: inherit;
   cursor: pointer;
   border: 1px solid var(--border);
@@ -129,33 +133,111 @@ input[type="text"] {
 /* ==========================================================
    To-do list
    ========================================================== */
-.todo-form {
+.card-header {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.todo-form input {
-  flex: 1;          /* il campo occupa tutto lo spazio disponibile */
-  min-width: 0;
+.card-header h2 {
+  margin: 0;
 }
 
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.filter {
+.button.small {
   padding: 0.25rem 0.75rem;
   font-size: 0.9rem;
 }
 
-.filter.active {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--surface);
+/* ---------- Tag e filtri ---------- */
+.tags-panel {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: var(--radius);
+}
+
+.tag-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tag-form input[type="text"] {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.tag-form input[type="color"] {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tag-list .hint {
+  margin: 0;
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* "Pillola" colorata: il colore arriva dalla variabile --tag-color impostata da JavaScript.
+   Lo sfondo è una versione trasparente di quel colore, così il testo resta leggibile
+   sia nel tema chiaro sia in quello scuro. */
+.tag {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.6rem;
+  border: 1px solid var(--tag-color);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tag-color) 18%, transparent);
+  color: var(--text);
+}
+
+button.tag {
+  cursor: pointer;
+}
+
+.tag.active {
+  background: color-mix(in srgb, var(--tag-color) 55%, transparent);
+  font-weight: 600;
+}
+
+.tag-remove {
+  font: inherit;
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tag-remove:hover {
+  color: var(--accent);
 }
 
 /* Kanban: una colonna su schermi stretti, tre su quelli larghi */
@@ -172,6 +254,9 @@ input[type="text"] {
 }
 
 .kanban-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 24rem;      /* altezza minima: le colonne restano ampie anche se vuote */
   background: var(--bg);
   border: 2px solid transparent;
   border-radius: var(--radius);
@@ -197,16 +282,41 @@ input[type="text"] {
   list-style: none;
   margin: 0;
   padding: 0;
-  min-height: 3rem;       /* le colonne vuote restano un bersaglio comodo per il drop */
+  flex: 1;                /* la lista occupa lo spazio libero: tutta la colonna è un bersaglio per il drop */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+.add-button {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  font: inherit;
+  text-align: left;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.add-form {
+  margin-top: 0.75rem;
+}
+
+.add-input {
+  width: 100%;
+}
+
 .todo-item {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.4rem;
   padding: 0.6rem 0.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -216,6 +326,26 @@ input[type="text"] {
 
 .todo-item.dragging {
   opacity: 0.4;
+}
+
+.todo-main {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.todo-tags,
+.tag-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag-picker {
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .todo-text {

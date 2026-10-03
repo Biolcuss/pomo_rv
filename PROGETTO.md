@@ -13,6 +13,8 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Tre colonne **fisse**: To-do, In corso, Completate
 - Le task si spostano tra le colonne (e si riordinano dentro la colonna) con il **drag & drop**
 - Una task è "completata" solo se trascinata nella colonna Completate (niente casella da spuntare)
+- Le task si aggiungono direttamente nelle colonne, con il pulsante "+ Aggiungi task" in fondo a ciascuna
+- Le colonne hanno un'altezza minima, così restano ampie anche se vuote
 - Aggiungere, modificare ed eliminare task
 - **Tag** personalizzabili e colorati (es. lavoro, casa, urgente, 5 minuti): una task può averne più di uno
 - Pannello filtri richiudibile (chiuso di default) per creare/eliminare tag e mostrare solo le task con certi tag
@@ -49,7 +51,8 @@ Focus App/
 ├── css/style.css      ← aspetto grafico (come appare)
 ├── js/
 │   ├── storage.js     ← lettura/scrittura dati nel browser
-│   ├── todo.js        ← logica della to-do list
+│   ├── todo.js        ← logica del kanban e delle task
+│   ├── tags.js        ← tag colorati e pannello filtri
 │   ├── timer.js       ← logica del Pomodoro timer
 │   ├── theme.js       ← interruttore tema chiaro/scuro
 │   └── main.js        ← avvio dell'app, collega tutti i pezzi
@@ -64,7 +67,7 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 - [x] 3. **Tema chiaro/scuro**
 - [x] 4. **To-do base** — aggiungi, completa, modifica, elimina, salvataggio
 - [x] 5. **Kanban** — tre colonne con drag & drop
-- [ ] 5b. **Tag e filtri** — tag colorati, più tag per task, pannello filtri richiudibile
+- [x] 5b. **Tag e filtri** — tag colorati, più tag per task, pannello filtri richiudibile
 - [ ] 6. **Pomodoro base** — start/pausa/reset e cicli
 - [ ] 7. **Impostazioni Pomodoro** — durate personalizzabili
 - [ ] 8. **Suono e notifiche**

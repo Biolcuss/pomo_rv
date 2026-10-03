@@ -4,9 +4,8 @@
 // La colonna in cui sta una task è decisa dal suo campo `status`.
 
 import { load, save } from './storage.js';
+import { initTags, getTags, getTag, getActiveFilter, createTagChip } from './tags.js';
 
-const form = document.getElementById('todo-form');
-const input = document.getElementById('todo-input');
 const kanban = document.querySelector('.kanban');
 
 // Le colonne fisse: stato → elemento <ul> della colonna
@@ -16,18 +15,24 @@ for (const status of STATUSES) {
   lists[status] = kanban.querySelector(`[data-status="${status}"] .todo-list`);
 }
 
-// Ogni task è un oggetto: { id, text, status, createdAt }
+// Ogni task è un oggetto: { id, text, status, tags, createdAt }
+// `tags` è una lista di id di tag (vedi tags.js).
 let tasks = migrate(load('tasks', []));
-let editingId = null;   // id della task in modifica (null = nessuna)
+let editingId = null;   // id della task di cui si sta modificando il testo
+let taggingId = null;   // id della task di cui si stanno scegliendo i tag
 let draggedId = null;   // id della task che si sta trascinando
 
-// Le task salvate nella Tappa 4 avevano `done: true/false` invece di `status`.
-// Le convertiamo così non si perde nulla.
+// Adegua le task salvate con versioni precedenti dell'app, così non si perde nulla:
+// - Tappa 4: `done: true/false` → `status`
+// - Tappa 5b: aggiunta del campo `tags`
 function migrate(savedTasks) {
   return savedTasks.map((task) => {
-    if (task.status) return task;
     const { done, ...rest } = task;
-    return { ...rest, status: done ? 'done' : 'todo' };
+    return {
+      ...rest,
+      status: task.status ?? (done ? 'done' : 'todo'),
+      tags: task.tags ?? [],
+    };
   });
 }
 
@@ -38,9 +43,14 @@ function saveAndRender() {
 
 // ---------- Disegno delle colonne ----------
 
+// Una task è visibile se ha tutti i tag selezionati nel filtro (nessun filtro = tutte)
+function isVisible(task) {
+  return getActiveFilter().every((tagId) => task.tags.includes(tagId));
+}
+
 function render() {
   for (const status of STATUSES) {
-    const columnTasks = tasks.filter((task) => task.status === status);
+    const columnTasks = tasks.filter((task) => task.status === status && isVisible(task));
     lists[status].replaceChildren(...columnTasks.map(createTaskElement));
     // Il numero di task accanto al titolo della colonna
     lists[status].parentElement.querySelector('.column-count').textContent =
@@ -53,13 +63,17 @@ function createTaskElement(task) {
   li.className = 'todo-item' + (task.status === 'done' ? ' done' : '');
   li.dataset.id = task.id;   // ci serve per sapere su quale task si è cliccato
 
+  // Riga principale: testo (o campo di modifica) e pulsanti
+  const main = document.createElement('div');
+  main.className = 'todo-main';
+
   if (task.id === editingId) {
     // Modalità modifica: al posto del testo c'è un campo editabile
     const editInput = document.createElement('input');
     editInput.type = 'text';
     editInput.className = 'edit-input';
     editInput.value = task.text;
-    li.append(editInput);
+    main.append(editInput);
     setTimeout(() => editInput.focus(), 0);   // dopo che è stato inserito nella pagina
   } else {
     li.draggable = true;   // rende la task trascinabile
@@ -67,13 +81,48 @@ function createTaskElement(task) {
     const text = document.createElement('span');
     text.className = 'todo-text';
     text.textContent = task.text;   // textContent è sicuro: non interpreta HTML
-    li.append(text);
+    main.append(
+      text,
+      createActionButton('tag', '🏷️', 'Tag'),
+      createActionButton('edit', '✏️', 'Modifica'),
+      createActionButton('delete', '🗑️', 'Elimina'),
+    );
+  }
+  li.append(main);
 
-    li.append(createActionButton('edit', '✏️', 'Modifica'));
-    li.append(createActionButton('delete', '🗑️', 'Elimina'));
+  // Tag assegnati alla task
+  const assigned = task.tags.map(getTag).filter(Boolean);
+  if (assigned.length > 0) {
+    const tagRow = document.createElement('div');
+    tagRow.className = 'todo-tags';
+    tagRow.append(...assigned.map((tag) => createTagChip(tag)));
+    li.append(tagRow);
+  }
+
+  // Selettore dei tag (aperto con il pulsante 🏷️)
+  if (task.id === taggingId) {
+    li.append(createTagPicker(task));
   }
 
   return li;
+}
+
+function createTagPicker(task) {
+  const picker = document.createElement('div');
+  picker.className = 'tag-picker';
+
+  if (getTags().length === 0) {
+    picker.textContent = 'Nessun tag: creane uno da "Tag e filtri".';
+    return picker;
+  }
+
+  for (const tag of getTags()) {
+    const chip = createTagChip(tag, 'button', task.tags.includes(tag.id));
+    chip.dataset.action = 'toggle-tag';
+    chip.dataset.tagId = tag.id;
+    picker.append(chip);
+  }
+  return picker;
 }
 
 function createActionButton(action, icon, label) {
@@ -88,11 +137,13 @@ function createActionButton(action, icon, label) {
 
 // ---------- Azioni sulle task ----------
 
-function addTask(text) {
+function addTask(text, status) {
   tasks.push({
     id: crypto.randomUUID(),
     text,
-    status: 'todo',
+    status,
+    // Se un filtro è attivo, la nuova task prende quei tag: altrimenti sparirebbe subito
+    tags: getActiveFilter(),
     createdAt: Date.now(),
   });
   saveAndRender();
@@ -100,6 +151,15 @@ function addTask(text) {
 
 function deleteTask(id) {
   tasks = tasks.filter((t) => t.id !== id);
+  if (taggingId === id) taggingId = null;
+  saveAndRender();
+}
+
+function toggleTaskTag(taskId, tagId) {
+  const task = tasks.find((t) => t.id === taskId);
+  task.tags = task.tags.includes(tagId)
+    ? task.tags.filter((id) => id !== tagId)
+    : [...task.tags, tagId];
   saveAndRender();
 }
 
@@ -202,37 +262,97 @@ function setupDragAndDrop() {
   });
 }
 
+// ---------- Aggiunta di task dentro le colonne ----------
+
+function openAddForm(column) {
+  column.querySelector('.add-form').hidden = false;
+  column.querySelector('.add-button').hidden = true;
+  column.querySelector('.add-input').focus();
+}
+
+function closeAddForm(column) {
+  column.querySelector('.add-form').hidden = true;
+  column.querySelector('.add-button').hidden = false;
+  column.querySelector('.add-input').value = '';
+}
+
+function setupAddForms() {
+  // Invio nel campo di testo: aggiunge la task in quella colonna.
+  // Il campo resta aperto per inserire più task di fila.
+  kanban.addEventListener('submit', (event) => {
+    event.preventDefault();   // impedisce il ricaricamento della pagina
+    const column = event.target.closest('.kanban-column');
+    const field = column.querySelector('.add-input');
+    const text = field.value.trim();
+    if (!text) return;
+    addTask(text, column.dataset.status);
+    field.value = '';
+    field.focus();
+  });
+
+  kanban.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && event.target.classList.contains('add-input')) {
+      closeAddForm(event.target.closest('.kanban-column'));
+    }
+  });
+
+  // Se si esce dal campo senza aver scritto nulla, si richiude
+  kanban.addEventListener('focusout', (event) => {
+    if (event.target.classList.contains('add-input') && !event.target.value.trim()) {
+      closeAddForm(event.target.closest('.kanban-column'));
+    }
+  });
+}
+
 // ---------- Eventi ----------
 
 export function initTodo() {
-  render();
-  setupDragAndDrop();
-
-  // Invio del form: aggiunge una task
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();   // impedisce il ricaricamento della pagina
-    const text = input.value.trim();
-    if (!text) return;
-    addTask(text);
-    input.value = '';
-    input.focus();
+  initTags({
+    onChange: render,
+    countUsage: (tagId) => tasks.filter((t) => t.tags.includes(tagId)).length,
+    onTagDeleted: (tagId) => {
+      for (const task of tasks) {
+        task.tags = task.tags.filter((id) => id !== tagId);
+      }
+      save('tasks', tasks);
+    },
   });
 
-  // Un solo "ascoltatore" sul kanban gestisce tutte le task (event delegation):
+  render();
+  setupDragAndDrop();
+  setupAddForms();
+
+  // Un solo "ascoltatore" sul kanban gestisce tutti i pulsanti (event delegation):
   // le task cambiano di continuo, il kanban invece resta sempre lo stesso.
   kanban.addEventListener('click', (event) => {
     const button = event.target.closest('[data-action]');
     if (!button) return;
+
+    if (button.dataset.action === 'open-add') {
+      openAddForm(button.closest('.kanban-column'));
+      return;
+    }
+
     const id = button.closest('.todo-item').dataset.id;
-    if (button.dataset.action === 'delete') {
-      deleteTask(id);
-    } else if (button.dataset.action === 'edit') {
-      editingId = id;
-      render();
+    switch (button.dataset.action) {
+      case 'delete':
+        deleteTask(id);
+        break;
+      case 'edit':
+        editingId = id;
+        render();
+        break;
+      case 'tag':
+        taggingId = taggingId === id ? null : id;   // apre/chiude il selettore
+        render();
+        break;
+      case 'toggle-tag':
+        toggleTaskTag(id, button.dataset.tagId);
+        break;
     }
   });
 
-  // Modifica: Invio conferma, Esc annulla, uscire dal campo conferma
+  // Modifica del testo: Invio conferma, Esc annulla, uscire dal campo conferma
   kanban.addEventListener('keydown', (event) => {
     if (!event.target.classList.contains('edit-input')) return;
     const id = event.target.closest('.todo-item').dataset.id;
