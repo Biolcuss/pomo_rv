@@ -4,6 +4,7 @@
 // (dove il browser rallenta i timer).
 
 import { load, save } from './storage.js';
+import { updateJourney } from './journey.js';
 
 // Durate in minuti. `cycles` = quanti pomodori di lavoro prima della pausa lunga.
 const DEFAULTS = { work: 25, shortBreak: 5, longBreak: 15, cycles: 4 };
@@ -88,6 +89,9 @@ function render() {
   const started = remaining < phaseSeconds(mode);
   startButton.textContent = isRunning() ? 'Pausa' : started ? 'Riprendi' : 'Avvia';
   document.documentElement.dataset.timerMode = mode;   // il CSS può colorare in base alla fase
+
+  // La scena del camper segue il timer: progresso della fase corrente (0 = inizio, 1 = fine)
+  updateJourney({ mode, progress: 1 - remaining / phaseSeconds(mode), running: isRunning() });
 
   if (mode !== lastMode) {
     if (lastMode !== null) announceEl.textContent = `Fase: ${MODE_LABELS[mode]}`;

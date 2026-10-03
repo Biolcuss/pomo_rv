@@ -190,8 +190,8 @@ input {
 }
 
 /* ==========================================================
-   Layout: timer fisso a sinistra, kanban a destra.
-   Sotto i 1000px il timer sta sopra, centrato.
+   Layout: in alto timer + scena del camper affiancati, sotto il kanban a tutta larghezza.
+   Sotto i 1000px tutto in colonna.
    ========================================================== */
 .layout {
   max-width: 1280px;
@@ -199,7 +199,6 @@ input {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
-  align-items: start;
 }
 
 @media (min-width: 1000px) {
@@ -208,10 +207,53 @@ input {
     gap: 2rem;
   }
 
-  .dial-plate {
-    position: sticky;
-    top: 1rem;
+  .board {
+    grid-column: 1 / -1;   /* il kanban occupa tutta la riga sotto */
   }
+}
+
+/* ==========================================================
+   Scena ASCII del camper: una "finestra di terminale" scura come il quadrante
+   ========================================================== */
+.scene-window {
+  --win-bg: var(--dial);
+  --win-border: linear-gradient(var(--dial-line), var(--dial-line));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 6px 6px 0 var(--hard-shadow);
+  color: var(--dial-text);
+  container-type: inline-size;   /* il disegno si adatta alla larghezza della finestra */
+}
+
+.scene-window:hover {
+  --win-border: linear-gradient(135deg, var(--g1), var(--g2));
+}
+
+/* 64 colonne di caratteri: la dimensione del font segue la larghezza della finestra
+   (JetBrains Mono: ogni carattere è largo 0,6 em → 64 × 0,6 = 38,4 em) */
+.scene-art {
+  width: max-content;
+  max-width: 100%;
+  margin: auto;            /* centrato in orizzontale e in verticale nella finestra */
+  font-family: var(--font);
+  font-size: min(calc(100cqi / 39), 1.15rem);
+  line-height: 1.2;
+  color: var(--dial-text);
+  overflow: hidden;
+}
+
+.scene-art .c-acc { color: var(--dial-accent); }
+.scene-art .c-amb { color: var(--dial-break); }
+.scene-art .c-txt { color: var(--dial-text); }
+.scene-art .c-mut { color: var(--dial-muted); }
+.scene-art .c-dim { color: color-mix(in srgb, var(--dial-muted) 45%, var(--dial)); }
+
+/* In campeggio le montagne sono più presenti */
+.scene-window[data-scene="camp"] .c-dim {
+  color: color-mix(in srgb, var(--dial-muted) 65%, var(--dial));
 }
 
 /* ==========================================================
@@ -312,6 +354,7 @@ input[type="text"]::placeholder {
    Il trucco: due sfondi, uno pieno dentro il bordo e un gradiente dietro.
    ========================================================== */
 .dial-plate,
+.scene-window,
 .kanban-column,
 .tags-panel {
   border: 2px solid transparent;

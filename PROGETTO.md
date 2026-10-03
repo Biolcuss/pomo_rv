@@ -30,7 +30,8 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Suono e notifica del browser a fine sessione
 
 ### Generale
-- Pagina unica: timer a sinistra (quadrante scuro con anello che si svuota, resta fermo mentre si scorre) e kanban a destra; su schermi stretti timer sopra e colonne impilate
+- Pagina unica: in alto timer (quadrante scuro con anello che si svuota) e accanto la scena ASCII del viaggio; sotto il kanban a tutta larghezza. Su schermi stretti tutto in colonna
+- Scena ASCII art accanto al timer: durante il lavoro un camper (stile cartoon) va dal punto A al punto B seguendo il progresso del pomodoro; durante le pause il camper è parcheggiato in campeggio, con montagne, falò, stelle e luna. La scena si anima solo mentre il timer corre: in pausa si ferma esattamente dov'è
 - Menu della task con "Sposta in…" come alternativa al drag & drop (tastiera e touch)
 - Tema chiaro / scuro selezionabile con un interruttore (la scelta viene ricordata)
 - Estetica "terminale / Hyprland": font JetBrains Mono + Press Start 2P (titolo e cifre del timer), finestre con bordo a gradiente quando sono attive, anello del timer a segmenti. Tema chiaro: bianco + viola (pause in ambra). Tema scuro: nero/grigio + verde fosforo (pause in ambra)
@@ -59,6 +60,7 @@ Focus App/
 │   ├── todo.js        ← logica del kanban e delle task
 │   ├── tags.js        ← tag colorati e pannello filtri
 │   ├── timer.js       ← logica del Pomodoro timer
+│   ├── journey.js     ← scena ASCII del camper (viaggio e campeggio)
 │   ├── theme.js       ← interruttore tema chiaro/scuro
 │   └── main.js        ← avvio dell'app, collega tutti i pezzi
 └── assets/sounds/     ← eventuali suoni
