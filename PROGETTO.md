@@ -9,11 +9,14 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 
 ## Funzionalità della versione 1
 
-### To-do list
-- Aggiungere, modificare, eliminare e segnare come completata una task
-- Filtri: tutte / da fare / completate
-- Riordino delle task trascinandole (drag & drop)
-- Le task restano salvate anche chiudendo il browser
+### To-do list (struttura kanban)
+- Tre colonne **fisse**: To-do, In corso, Completate
+- Le task si spostano tra le colonne (e si riordinano dentro la colonna) con il **drag & drop**
+- Una task è "completata" solo se trascinata nella colonna Completate (niente casella da spuntare)
+- Aggiungere, modificare ed eliminare task
+- **Tag** personalizzabili e colorati (es. lavoro, casa, urgente, 5 minuti): una task può averne più di uno
+- Pannello filtri richiudibile (chiuso di default) per creare/eliminare tag e mostrare solo le task con certi tag
+- Le task e i tag restano salvati anche chiudendo il browser
 
 ### Pomodoro timer
 - Avvio, pausa e reset
@@ -22,7 +25,7 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Suono e notifica del browser a fine sessione
 
 ### Generale
-- Pagina unica: to-do list e timer affiancati (uno sotto l'altro su schermi piccoli)
+- Pagina unica: timer in alto (card compatta), kanban sotto a tutta larghezza (colonne impilate su schermi piccoli)
 - Tema chiaro / scuro selezionabile con un interruttore (la scelta viene ricordata)
 - Interfaccia in italiano
 
@@ -60,13 +63,19 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 - [x] 2. **Scheletro della pagina** — HTML e layout CSS
 - [x] 3. **Tema chiaro/scuro**
 - [x] 4. **To-do base** — aggiungi, completa, modifica, elimina, salvataggio
-- [ ] 5. **To-do avanzata** — filtri e drag & drop
+- [x] 5. **Kanban** — tre colonne con drag & drop
+- [ ] 5b. **Tag e filtri** — tag colorati, più tag per task, pannello filtri richiudibile
 - [ ] 6. **Pomodoro base** — start/pausa/reset e cicli
 - [ ] 7. **Impostazioni Pomodoro** — durate personalizzabili
 - [ ] 8. **Suono e notifiche**
 - [ ] 9. **Rifinitura** — tempo nel titolo della scheda, accessibilità, pulizia
 
+## Note e limiti noti
+- Il drag & drop del browser (HTML5) funziona con il mouse; sui touchscreen (telefono/tablet) non è affidabile. Per ora l'app è pensata per il computer. Se servirà su telefono, aggiungeremo un'alternativa (es. menu "Sposta in…").
+- Quando verrà fatto il reward system, il timer potrà spostare automaticamente le task in "Completate".
+
 ## Idee per il futuro (non incluse ora)
+- **Colonne personalizzabili** nel kanban
 - **Reward system**: punti/badge quando si completa una task o si rispetta il timer
 - **Animazione del timer**: anello circolare che si svuota con il tempo
 - **Statistiche**: pomodori completati oggi / in totale

@@ -58,7 +58,7 @@ h1, h2 {
 }
 
 /* ==========================================================
-   Layout: una colonna su schermi stretti, due su quelli larghi
+   Layout: timer in alto (compatto e centrato), kanban sotto a tutta larghezza
    ========================================================== */
 .layout {
   max-width: 1100px;
@@ -66,13 +66,12 @@ h1, h2 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  align-items: start;
 }
 
-@media (min-width: 800px) {
-  .layout {
-    grid-template-columns: 2fr 3fr;  /* timer a sinistra, to-do più larga a destra */
-  }
+#timer-section {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .card {
@@ -159,22 +158,64 @@ input[type="text"] {
   color: var(--surface);
 }
 
+/* Kanban: una colonna su schermi stretti, tre su quelli larghi */
+.kanban {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .kanban {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.kanban-column {
+  background: var(--bg);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.75rem;
+}
+
+/* Colonna evidenziata mentre ci si trascina sopra una task */
+.kanban-column.drag-over {
+  border-color: var(--accent);
+}
+
+.kanban-column h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.column-count {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
 .todo-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  min-height: 3rem;       /* le colonne vuote restano un bersaglio comodo per il drop */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .todo-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
 }
 
-.todo-item:last-child {
-  border-bottom: none;
+.todo-item.dragging {
+  opacity: 0.4;
 }
 
 .todo-text {
@@ -192,12 +233,6 @@ input[type="text"] {
   width: 2rem;
   height: 2rem;
   font-size: 0.9rem;
-}
-
-.empty-message {
-  padding: 1rem 0;
-  text-align: center;
-  color: var(--text-muted);
 }
 
 .todo-item.done .todo-text {
