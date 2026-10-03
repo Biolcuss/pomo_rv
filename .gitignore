@@ -1,0 +1,4 @@
+# File di sistema e dell'editor da non salvare in Git
+.DS_Store
+Thumbs.db
+.vscode/
