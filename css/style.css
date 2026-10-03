@@ -15,6 +15,16 @@
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* Tema scuro: ridefinisce solo i colori. Si attiva quando <html> ha data-theme="dark" */
+:root[data-theme="dark"] {
+  --bg: #14171c;
+  --surface: #1e232b;
+  --text: #e8eaed;
+  --text-muted: #9aa4b1;
+  --border: #323944;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 /* ==========================================================
    Base
    ========================================================== */

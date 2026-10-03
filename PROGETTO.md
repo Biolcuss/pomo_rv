@@ -58,7 +58,7 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 
 - [x] 1. **Setup** — Git, documenti di progetto, Live Server
 - [x] 2. **Scheletro della pagina** — HTML e layout CSS
-- [ ] 3. **Tema chiaro/scuro**
+- [x] 3. **Tema chiaro/scuro**
 - [ ] 4. **To-do base** — aggiungi, completa, modifica, elimina, salvataggio
 - [ ] 5. **To-do avanzata** — filtri e drag & drop
 - [ ] 6. **Pomodoro base** — start/pausa/reset e cicli
