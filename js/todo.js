@@ -20,6 +20,7 @@ for (const status of STATUSES) {
 let tasks = migrate(load('tasks', []));
 let editingId = null;   // id della task di cui si sta modificando il testo
 let taggingId = null;   // id della task di cui si stanno scegliendo i tag
+let menuId = null;      // id della task con il menu a tre puntini aperto
 let draggedId = null;   // id della task che si sta trascinando
 
 // Adegua le task salvate con versioni precedenti dell'app, così non si perde nulla:
@@ -81,14 +82,14 @@ function createTaskElement(task) {
     const text = document.createElement('span');
     text.className = 'todo-text';
     text.textContent = task.text;   // textContent è sicuro: non interpreta HTML
-    main.append(
-      text,
-      createActionButton('tag', '🏷️', 'Tag'),
-      createActionButton('edit', '✏️', 'Modifica'),
-      createActionButton('delete', '🗑️', 'Elimina'),
-    );
+    main.append(text, createActionButton('menu', '⋯', 'Azioni'));
   }
   li.append(main);
+
+  // Menu a tre puntini (aperto con il pulsante ⋯)
+  if (task.id === menuId) {
+    li.append(createTaskMenu());
+  }
 
   // Tag assegnati alla task
   const assigned = task.tags.map(getTag).filter(Boolean);
@@ -107,13 +108,34 @@ function createTaskElement(task) {
   return li;
 }
 
+function createTaskMenu() {
+  const menu = document.createElement('div');
+  menu.className = 'task-menu';
+  menu.setAttribute('role', 'menu');
+
+  const items = [
+    ['edit', '✏️', 'Modifica'],
+    ['tag', '🏷️', 'Tag'],
+    ['delete', '🗑️', 'Elimina'],
+  ];
+  for (const [action, icon, label] of items) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'menu-item';
+    item.dataset.action = action;
+    item.setAttribute('role', 'menuitem');
+    item.textContent = `${icon} ${label}`;
+    menu.append(item);
+  }
+  return menu;
+}
+
 function createTagPicker(task) {
   const picker = document.createElement('div');
   picker.className = 'tag-picker';
 
   if (getTags().length === 0) {
-    picker.textContent = 'Nessun tag: creane uno da "Tag e filtri".';
-    return picker;
+    picker.append('Nessun tag: creane uno da "Tag e filtri".');
   }
 
   for (const tag of getTags()) {
@@ -122,6 +144,15 @@ function createTagPicker(task) {
     chip.dataset.tagId = tag.id;
     picker.append(chip);
   }
+
+  // Pulsante per richiudere il selettore
+  const done = document.createElement('button');
+  done.type = 'button';
+  done.className = 'picker-done';
+  done.dataset.action = 'close-tag';
+  done.textContent = 'Fatto';
+  picker.append(done);
+
   return picker;
 }
 
@@ -334,7 +365,18 @@ export function initTodo() {
     }
 
     const id = button.closest('.todo-item').dataset.id;
-    switch (button.dataset.action) {
+    const action = button.dataset.action;
+
+    // Scegliere una voce del menu lo richiude
+    if (action === 'edit' || action === 'tag' || action === 'delete') {
+      menuId = null;
+    }
+
+    switch (action) {
+      case 'menu':
+        menuId = menuId === id ? null : id;   // apre/chiude il menu
+        render();
+        break;
       case 'delete':
         deleteTask(id);
         break;
@@ -343,12 +385,31 @@ export function initTodo() {
         render();
         break;
       case 'tag':
-        taggingId = taggingId === id ? null : id;   // apre/chiude il selettore
+        taggingId = id;   // apre il selettore dei tag sotto la task
+        render();
+        break;
+      case 'close-tag':
+        taggingId = null;
         render();
         break;
       case 'toggle-tag':
         toggleTaskTag(id, button.dataset.tagId);
         break;
+    }
+  });
+
+  // Clic fuori dal menu (o Esc) lo richiude
+  document.addEventListener('click', (event) => {
+    if (menuId && !event.target.closest('.task-menu, [data-action="menu"]')) {
+      menuId = null;
+      render();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menuId) {
+      menuId = null;
+      render();
     }
   });
 

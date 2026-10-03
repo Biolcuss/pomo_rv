@@ -9,6 +9,7 @@ let tags = load('tags', []);
 const activeFilter = new Set();   // id dei tag selezionati come filtro (non viene salvato)
 
 const toggleButton = document.getElementById('tags-toggle');
+const closeButton = document.getElementById('tags-close');
 const panel = document.getElementById('tags-panel');
 const form = document.getElementById('tag-form');
 const nameInput = document.getElementById('tag-name');
@@ -80,6 +81,15 @@ function renderPanel() {
     activeFilter.size > 0 ? `Tag e filtri (${activeFilter.size})` : 'Tag e filtri';
 }
 
+// Apre/chiude il cassetto laterale. La classe "open" lo fa scorrere dentro la pagina
+// (vedi il CSS); `inert` impedisce di raggiungere i suoi campi con Tab quando è chiuso.
+function setPanelOpen(open) {
+  panel.classList.toggle('open', open);
+  panel.inert = !open;
+  toggleButton.setAttribute('aria-expanded', String(open));
+  if (open) nameInput.focus();
+}
+
 // ---------- Eventi ----------
 
 // onChange: da chiamare quando filtri o tag cambiano (todo.js ridisegna le colonne)
@@ -89,8 +99,16 @@ export function initTags({ onChange, countUsage, onTagDeleted }) {
   renderPanel();
 
   toggleButton.addEventListener('click', () => {
-    panel.hidden = !panel.hidden;
-    toggleButton.setAttribute('aria-expanded', String(!panel.hidden));
+    setPanelOpen(!panel.classList.contains('open'));
+  });
+  closeButton.addEventListener('click', () => setPanelOpen(false));
+
+  // Esc chiude il pannello (se il focus è dentro il pannello o sulla pagina in generale)
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !panel.classList.contains('open')) return;
+    if (panel.contains(event.target) || event.target === document.body) {
+      setPanelOpen(false);
+    }
   });
 
   // Creazione di un nuovo tag
