@@ -1,32 +1,85 @@
 /* ==========================================================
    Variabili colore e misure
-   Definite una volta sola e riusate ovunque con var(--nome).
-   Nella Tappa 3 aggiungeremo i valori per il tema scuro.
+   Estetica "terminale / Hyprland": finestre con bordo a gradiente (la finestra attiva è
+   quella sotto il mouse o con il focus), font monospace, titolo e cifre del timer in font pixel.
+
+   Due palette, un colore per ruolo:
+   - Chiaro: bianco + viola. Viola = azioni, timer, bordo attivo. Ambra = pause e "completate".
+   - Scuro: nero/grigio + verde "fosforo" da terminale. Verde = azioni, timer, bordo attivo.
+     Ambra = pause e "completate" (come i vecchi monitor monocromatici).
+   Il quadrante del timer è scuro in entrambi i temi.
    ========================================================== */
 :root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --text: #1f2933;
-  --text-muted: #6b7785;
-  --border: #dde1e6;
-  --accent: #e4572e;        /* rosso "pomodoro" */
-  --accent-text: #ffffff;
-  --done-column: #e1e4e8;   /* colonna "Completate": più scura delle altre */
-  --done-item: #eceef1;     /* task completate: più scure delle task normali */
-  --radius: 12px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  color-scheme: light;
+  --bg: #f5f3fb;
+  --surface: #ffffff;         /* task, pannelli */
+  --text: #1e1a33;
+  --text-muted: #5b5578;
+  --border: #d6cfec;
+  --lane: #ede9f8;            /* sfondo delle colonne */
+  --lane-done: #e0daf1;       /* colonna "Completate": più scura delle altre */
+  --done-item: #f1eef9;       /* task completate */
+  --grid: rgba(109, 63, 217, 0.12);   /* puntini dello sfondo */
+
+  --accent: #6d3fd9;          /* viola: pulsanti principali, cursori */
+  --accent-text: #ffffff;     /* testo sopra --accent */
+  --accent-ink: #5a2dc4;      /* viola per testi e bordi su sfondo chiaro */
+  --break: #d98a06;           /* ambra: pause, colonna completate */
+  --danger: #c4234b;          /* azioni distruttive (elimina) */
+
+  --g1: #6d3fd9;              /* gradiente del bordo "attivo", come in Hyprland */
+  --g2: #b57cff;
+
+  --dial: #1b1530;
+  --dial-text: #f1ecff;
+  --dial-muted: #b3a9d6;
+  --dial-track: #3a2f63;
+  --dial-line: rgba(241, 236, 255, 0.22);
+  --dial-accent: #a78bfa;     /* anello durante il lavoro */
+  --dial-break: #fbbf24;      /* anello durante le pause */
+  --dial-btn-text: #140f26;   /* testo del pulsante Avvia sopra l'anello */
+
+  --focus: #6d3fd9;
+  --hard-shadow: rgba(76, 40, 170, 0.28);
+  --shadow-drawer: -8px 0 0 rgba(109, 63, 217, 0.12);
+  --font: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-pixel: "Press Start 2P", var(--font);
 }
 
 /* Tema scuro: ridefinisce solo i colori. Si attiva quando <html> ha data-theme="dark" */
 :root[data-theme="dark"] {
-  --bg: #14171c;
-  --surface: #1e232b;
-  --text: #e8eaed;
-  --text-muted: #9aa4b1;
-  --border: #323944;
-  --done-column: #0d0f12;
-  --done-item: #171a1f;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+  --bg: #090b09;
+  --surface: #141814;
+  --text: #d9eadb;
+  --text-muted: #8fa391;
+  --border: #263026;
+  --lane: #0e110e;
+  --lane-done: #050605;
+  --done-item: #0c0f0c;
+  --grid: rgba(74, 222, 128, 0.07);
+
+  --accent: #4ade80;
+  --accent-text: #052e12;
+  --accent-ink: #6ee79a;
+  --break: #fbbf24;
+  --danger: #ff6b81;
+
+  --g1: #4ade80;
+  --g2: #2dd4bf;
+
+  --dial: #0c0f0c;
+  --dial-text: #d9eadb;
+  --dial-muted: #8fa391;
+  --dial-track: #223022;
+  --dial-line: rgba(217, 234, 219, 0.2);
+  --dial-accent: #4ade80;
+  --dial-break: #fbbf24;
+  --dial-btn-text: #052e12;
+
+  --focus: #4ade80;
+  --hard-shadow: rgba(0, 0, 0, 0.7);
+  --shadow-drawer: -8px 0 0 rgba(0, 0, 0, 0.5);
 }
 
 /* ==========================================================
@@ -38,106 +91,436 @@
 
 body {
   margin: 0;
-  padding: 0 1rem 2rem;
-  background: var(--bg);
+  padding: 0 1.25rem 3rem;
+  background-color: var(--bg);
+  /* Sfondo a puntini, come un "wallpaper" da terminale */
+  background-image: radial-gradient(circle, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font);
+  font-size: 0.9375rem;
   line-height: 1.5;
 }
 
-h1, h2 {
+h1, h2, h3 {
   margin: 0;
+  text-wrap: balance;
 }
 
-/* ==========================================================
-   Intestazione
-   ========================================================== */
-.app-header {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1.25rem 0;
-  display: flex;                    /* elementi in riga */
-  justify-content: space-between;   /* titolo a sinistra, pulsante a destra */
-  align-items: center;
+button,
+input {
+  touch-action: manipulation;
 }
 
-/* ==========================================================
-   Layout: timer in alto (compatto e centrato), kanban sotto a tutta larghezza
-   ========================================================== */
-.layout {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-#timer-section {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-}
-
-.card h2 {
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
-}
-
-/* ==========================================================
-   Pulsanti e campi di testo
-   ========================================================== */
 /* Un elemento con l'attributo hidden sparisce sempre, anche se il CSS gli dà un display */
 [hidden] {
   display: none !important;
 }
 
+/* Anello di focus ben visibile per chi usa la tastiera */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ==========================================================
+   Intestazione: titolo centrato, pulsante del tema a destra
+   ========================================================== */
+.app-header {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.75rem 3.5rem;   /* spazio a destra e sinistra: il titolo non tocca mai il pulsante */
+  text-align: center;
+}
+
+.app-header h1 {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.85rem, 2.6vw + 0.2rem, 1.6rem);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Cursore da terminale che lampeggia dopo il titolo */
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 0.4em;
+  vertical-align: -0.12em;
+  background: var(--accent);
+  animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+#theme-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ==========================================================
+   Layout: timer fisso a sinistra, kanban a destra.
+   Sotto i 1000px il timer sta sopra, centrato.
+   ========================================================== */
+.layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .dial-plate {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+/* ==========================================================
+   Pulsanti e campi di testo
+   ========================================================== */
 .button,
 .icon-button {
   font: inherit;
   cursor: pointer;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
   background: var(--surface);
   color: var(--text);
+  transition: background-color 0.12s steps(2), border-color 0.12s steps(2), color 0.12s steps(2);
+}
+
+.button:hover,
+.icon-button:hover {
+  border-color: var(--g1);
 }
 
 .button {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.9rem;
 }
 
 .button.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-text);
+  font-weight: 700;
+}
+
+.button.primary:hover {
+  filter: brightness(1.1);
+}
+
+.button.small {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  border-color: var(--border);
 }
 
 .icon-button {
+  display: inline-grid;
+  place-items: center;
   width: 2.5rem;
   height: 2.5rem;
+  padding: 0;
   font-size: 1.2rem;
+  line-height: 1;
+}
+
+.icon-button.small {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem;
+}
+
+.icon-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 input[type="text"] {
   font: inherit;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  border: 2px solid var(--border);
+  border-radius: 6px;
   background: var(--bg);
   color: var(--text);
 }
 
+input[type="text"]:focus {
+  border-color: var(--g1);
+}
+
+input[type="text"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 /* ==========================================================
-   To-do list
+   Finestre (stile Hyprland): bordo a gradiente quando sono "attive"
+   Il trucco: due sfondi, uno pieno dentro il bordo e un gradiente dietro.
    ========================================================== */
-.card-header {
+.dial-plate,
+.kanban-column,
+.tags-panel {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--win-bg), var(--win-bg)) padding-box,
+    var(--win-border) border-box;
+}
+
+.kanban-column {
+  --win-bg: var(--lane);
+  --win-border: linear-gradient(var(--border), var(--border));
+}
+
+.kanban-column[data-status="done"] {
+  --win-bg: var(--lane-done);
+}
+
+.kanban-column:hover,
+.kanban-column:focus-within,
+.kanban-column.drag-over {
+  --win-border: linear-gradient(135deg, var(--g1), var(--g2));
+}
+
+/* ==========================================================
+   Pomodoro timer: il quadrante
+   ========================================================== */
+.dial-plate {
+  --win-bg: var(--dial);
+  --win-border: linear-gradient(135deg, var(--g1), var(--g2));
+  --ring: var(--dial-accent);
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1.75rem;
+  border-radius: 12px;
+  box-shadow: 6px 6px 0 var(--hard-shadow);   /* ombra "dura", senza sfumatura */
+  color: var(--dial-text);
+  text-align: center;
+}
+
+/* Durante le pause l'anello diventa verde */
+:root[data-timer-mode="shortBreak"] .dial-plate,
+:root[data-timer-mode="longBreak"] .dial-plate {
+  --ring: var(--dial-break);
+}
+
+.dial-plate .icon-button {
+  background: transparent;
+  border-color: var(--dial-line);
+  color: var(--dial-text);
+}
+
+.dial-plate .icon-button:hover {
+  border-color: var(--dial-text);
+}
+
+.dial-plate :focus-visible {
+  outline-color: var(--dial-text);
+}
+
+/* Il pulsante ⋯ sta sopra l'anello (z-index) e ha un'area cliccabile più larga del disegno */
+.dial-settings {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 2;
+}
+
+.dial-settings::after {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+
+.dial {
+  position: relative;
+  width: min(280px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.dial-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);   /* l'anello parte dall'alto */
+  pointer-events: none;        /* l'anello non intercetta mai i clic */
+}
+
+.ring-track,
+.ring-progress,
+.ring-ticks {
+  fill: none;
+}
+
+.ring-track,
+.ring-progress {
+  stroke-width: 8;
+}
+
+.ring-track {
+  stroke: var(--dial-track);
+}
+
+.ring-progress {
+  stroke: var(--ring);
+}
+
+/* Tacche: 60 piccole interruzioni dipinte del colore del quadrante sopra l'anello,
+   così sembra fatto di segmenti (come una barra di caricamento) */
+.ring-ticks {
+  stroke: var(--dial);
+  stroke-width: 10;
+  stroke-dasharray: 2.4 7.025;   /* 565.5 (circonferenza) / 60 = 9.425 per tacca */
+}
+
+.dial-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-mode {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dial-muted);
+}
+
+.timer-mode::before {
+  content: "> ";
+  color: var(--ring);
+}
+
+.timer-display {
+  margin: 0.6rem 0 0.2rem;
+  font-family: var(--font-pixel);
+  font-size: 2.3rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* Un pallino per ogni pomodoro del giro: pieno = fatto, con bordo = in corso */
+.timer-dots {
+  display: flex;
+  gap: 0.4rem;
+  min-height: 0.7rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timer-dots li {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid var(--dial-track);
+}
+
+.timer-dots li.done {
+  background: var(--dial-text);
+  border-color: var(--dial-text);
+}
+
+.timer-dots li.current {
+  border-color: var(--ring);
+}
+
+.timer-cycle {
+  margin: 1rem 0 1.25rem;
+  color: var(--dial-muted);
+  font-size: 0.85rem;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.timer-controls .button {
+  background: transparent;
+  border-color: var(--dial-line);
+  color: var(--dial-text);
+}
+
+.timer-controls .button:hover {
+  border-color: var(--dial-text);
+}
+
+.timer-controls .button.primary {
+  min-width: 7.5rem;
+  background: var(--ring);
+  border-color: var(--ring);
+  color: var(--dial-btn-text);
+}
+
+/* ==========================================================
+   Task: intestazione e kanban
+   ========================================================== */
+.board {
+  min-width: 0;
+}
+
+.board-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,19 +528,274 @@ input[type="text"] {
   margin-bottom: 1rem;
 }
 
-.card-header h2 {
+.board-header h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.board-header h2::before {
+  content: "~/";
+  color: var(--g1);
+}
+
+/* Kanban: una colonna su schermi stretti, tre su quelli larghi */
+.kanban {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .kanban {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.kanban-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 24rem;      /* altezza minima: le colonne restano ampie anche se vuote */
+  border-radius: 10px;
+  padding: 0.9rem 0.7rem 0.7rem;
+}
+
+.kanban-column h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0.25rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* Il quadratino indica lo stato della colonna: grigio = da fare, colore principale = in corso, colore delle pause = finito */
+.status-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  background: var(--text-muted);
+}
+
+[data-status="doing"] .status-dot {
+  background: var(--accent);
+}
+
+[data-status="done"] .status-dot {
+  background: var(--break);
+}
+
+.column-count {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.column-count::before {
+  content: "[";
+}
+
+.column-count::after {
+  content: "]";
+}
+
+.todo-list {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  flex: 1;                /* la lista occupa lo spazio libero: tutta la colonna è un bersaglio per il drop */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.button.small {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.9rem;
+.add-button {
+  margin-bottom: 0.75rem;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--text-muted);
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-/* ---------- Tag e filtri ---------- */
-/* Cassetto laterale: fisso sul bordo destro dello schermo, fuori dal flusso della pagina
-   (per questo il kanban non si sposta). Parte fuori schermo e scorre dentro con "open". */
+.add-button:hover {
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+.add-form {
+  margin-bottom: 0.75rem;
+}
+
+.add-input {
+  width: 100%;
+}
+
+.todo-item {
+  position: relative;     /* serve per posizionare il menu a tre puntini sotto la task */
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.55rem 0.4rem 0.55rem 0.8rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: grab;
+}
+
+.todo-item.dragging {
+  opacity: 0.4;
+}
+
+.todo-item.done {
+  background: var(--done-item);
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.todo-main {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.todo-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;   /* le parole lunghe vanno a capo invece di uscire dalla card */
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-tags,
+.tag-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag-picker {
+  align-items: center;
+  padding-top: 0.4rem;
+  border-top: 2px dashed var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.picker-done {
+  margin-left: auto;
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.6rem;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Menu a tre puntini: appare sotto il pulsante, sopra le altre task */
+.task-menu {
+  position: absolute;
+  top: 2.6rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 11rem;
+  padding: 0.25rem;
+  background: var(--surface);
+  border: 2px solid var(--g1);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--hard-shadow);
+}
+
+.menu-item {
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: var(--g1);
+  color: var(--bg);
+}
+
+.menu-item[data-action="delete"]:hover {
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.menu-divider {
+  height: 2px;
+  margin: 0.25rem 0.4rem;
+  background: var(--border);
+}
+
+/* ---------- Tag ---------- */
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* "Pillola" colorata: il colore arriva dalla variabile --tag-color impostata da JavaScript.
+   Lo sfondo è una versione trasparente di quel colore, così il testo resta leggibile
+   sia nel tema chiaro sia in quello scuro. */
+.tag {
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--tag-color);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tag-color) 20%, transparent);
+  color: var(--text);
+}
+
+button.tag {
+  cursor: pointer;
+}
+
+.tag.active {
+  background: color-mix(in srgb, var(--tag-color) 55%, transparent);
+  font-weight: 700;
+}
+
+.tag-remove {
+  font: inherit;
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tag-remove:hover {
+  color: var(--danger);
+}
+
+/* ==========================================================
+   Cassetti laterali (tag e filtri, impostazioni timer)
+   Fissi sul bordo destro, fuori dal flusso della pagina (il kanban non si sposta).
+   Partono fuori schermo e scorrono dentro con "open". Si chiudono con ✕, Esc o un clic fuori.
+   ========================================================== */
 .tags-panel {
+  --win-bg: var(--surface);
+  --win-border: linear-gradient(180deg, var(--g1), var(--g2));
   position: fixed;
   top: 0;
   right: 0;
@@ -166,11 +804,15 @@ input[type="text"] {
   width: min(340px, 100vw);
   padding: 1rem 1.25rem;
   overflow-y: auto;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+  overscroll-behavior: contain;
+  color: var(--text);
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  box-shadow: var(--shadow-drawer);
   transform: translateX(100%);
-  transition: transform 0.25s ease;
+  transition: transform 0.2s steps(5);
+  text-align: left;
 }
 
 .tags-panel.open {
@@ -185,8 +827,8 @@ input[type="text"] {
 }
 
 .drawer-header h2 {
-  margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .tag-form {
@@ -201,7 +843,18 @@ input[type="text"] {
   min-width: 10rem;
 }
 
-/* Palette colori: una riga di pallini; il radio vero è nascosto ma resta usabile da tastiera */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tag-list .hint {
+  margin: 0;
+}
+
+/* Palette colori: una riga di quadrati; il radio vero è nascosto ma resta usabile da tastiera */
 .color-picker {
   flex-basis: 100%;
   display: flex;
@@ -224,330 +877,41 @@ input[type="text"] {
 
 .swatch span {
   display: block;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 4px;
   background: var(--swatch);
 }
 
-/* Pallino scelto: anello attorno */
+/* Quadrato scelto: anello attorno */
 .swatch input:checked + span {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
 }
 
 .swatch input:focus-visible + span {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 4px;
 }
 
-.hint {
-  margin: 0.75rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.tag-list .hint {
-  margin: 0;
-}
-
-.tag-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-/* "Pillola" colorata: il colore arriva dalla variabile --tag-color impostata da JavaScript.
-   Lo sfondo è una versione trasparente di quel colore, così il testo resta leggibile
-   sia nel tema chiaro sia in quello scuro. */
-.tag {
-  font: inherit;
-  font-size: 0.75rem;
-  padding: 0.1rem 0.6rem;
-  border: 1px solid var(--tag-color);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--tag-color) 18%, transparent);
-  color: var(--text);
-}
-
-button.tag {
-  cursor: pointer;
-}
-
-.tag.active {
-  background: color-mix(in srgb, var(--tag-color) 55%, transparent);
-  font-weight: 600;
-}
-
-.tag-remove {
-  font: inherit;
-  line-height: 1;
-  padding: 0.1rem 0.35rem;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.tag-remove:hover {
-  color: var(--accent);
-}
-
-/* Kanban: una colonna su schermi stretti, tre su quelli larghi */
-.kanban {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 800px) {
-  .kanban {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.kanban-column {
-  display: flex;
-  flex-direction: column;
-  min-height: 24rem;      /* altezza minima: le colonne restano ampie anche se vuote */
-  background: var(--bg);
-  border: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 0.75rem;
-}
-
-/* Colonna "Completate" oscurata rispetto alle altre */
-.kanban-column[data-status="done"] {
-  background: var(--done-column);
-}
-
-/* Colonna evidenziata mentre ci si trascina sopra una task */
-.kanban-column.drag-over {
-  border-color: var(--accent);
-}
-
-.kanban-column h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
-}
-
-.column-count {
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-.todo-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  flex: 1;                /* la lista occupa lo spazio libero: tutta la colonna è un bersaglio per il drop */
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.add-button {
-  margin-bottom: 0.75rem;
-  padding: 0.5rem;
-  font: inherit;
-  text-align: left;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.add-button:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.add-form {
-  margin-bottom: 0.75rem;
-}
-
-.add-input {
-  width: 100%;
-}
-
-.todo-item {
-  position: relative;     /* serve per posizionare il menu a tre puntini sotto la task */
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.6rem 0.75rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: grab;
-}
-
-.todo-item.dragging {
-  opacity: 0.4;
-}
-
-.todo-main {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.todo-tags,
-.tag-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.tag-picker {
-  align-items: center;
-  padding-top: 0.4rem;
-  border-top: 1px dashed var(--border);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.picker-done {
-  margin-left: auto;
-  font: inherit;
-  font-size: 0.8rem;
-  padding: 0.1rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-}
-
-/* Menu a tre puntini: appare sotto il pulsante, sopra le altre task */
-.task-menu {
-  position: absolute;
-  top: 2.6rem;
-  right: 0.5rem;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  min-width: 9rem;
-  padding: 0.25rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-}
-
-.menu-item {
-  font: inherit;
-  text-align: left;
-  padding: 0.4rem 0.6rem;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.menu-item:hover {
-  background: var(--bg);
-}
-
-.menu-item[data-action="delete"]:hover {
-  color: var(--accent);
-}
-
-.todo-text {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;   /* le parole lunghe vanno a capo invece di uscire dalla card */
-}
-
-.edit-input {
-  flex: 1;
-  min-width: 0;
-}
-
-.icon-button.small {
-  width: 2rem;
-  height: 2rem;
-  font-size: 0.9rem;
-}
-
-.todo-item.done {
-  background: var(--done-item);
-}
-
-.todo-item.done .todo-text {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-/* ==========================================================
-   Pomodoro timer
-   ========================================================== */
-#timer-section {
-  text-align: center;
-}
-
-.timer-mode {
-  margin: 0;
-  color: var(--accent);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.timer-display {
-  margin: 0.5rem 0 1.5rem;
-  font-size: 4.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;   /* cifre di larghezza fissa: il numero non "balla" */
-}
-
-.timer-controls {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.timer-cycle {
-  margin: 1rem 0 1rem;
-  color: var(--text-muted);
-}
-
-/* Le pause hanno un colore diverso dal lavoro */
-:root[data-timer-mode="shortBreak"] .timer-mode,
-:root[data-timer-mode="longBreak"] .timer-mode {
-  color: #3fa66a;
-}
-
-/* ---------- Pannello impostazioni timer ----------
-   Riusa il cassetto dei tag (.tags-panel), più largo; il colore pomodoro
-   è usato solo per i dettagli (cursori, pulsante Salva, preimpostazione attiva). */
+/* ---------- Pannello impostazioni timer ---------- */
 .timer-panel {
   display: flex;
   flex-direction: column;
   width: min(440px, 100vw);
   padding: 0;
   overflow: hidden;   /* scorre solo .panel-body: il pulsante Salva resta fermo in basso */
-  text-align: left;
 }
 
 .timer-panel .drawer-header {
   margin: 0;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 
 .panel-body {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.25rem;
   display: grid;
   align-content: start;
@@ -556,16 +920,18 @@ button.tag {
 
 .panel-section h3 {
   margin: 0 0 0.75rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.panel-section h3::before {
+  content: "# ";
+  color: var(--g1);
 }
 
 .panel-footer {
   padding: 1rem 1.25rem;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
+  border-top: 2px solid var(--border);
 }
 
 .panel-footer .hint {
@@ -574,16 +940,10 @@ button.tag {
 
 .panel-footer .button {
   width: 100%;
-  padding: 0.65rem 1rem;
-  font-weight: 600;
+  padding: 0.6rem 1rem;
 }
 
-.button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* Preimpostazioni: pillole cliccabili; quella uguale ai valori attuali è evidenziata */
+/* Preimpostazioni: etichette cliccabili; quella uguale ai valori attuali è evidenziata */
 .preset-list {
   display: flex;
   flex-wrap: wrap;
@@ -594,8 +954,8 @@ button.tag {
 .preset {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
   background: var(--surface);
   overflow: hidden;
 }
@@ -608,16 +968,16 @@ button.tag {
 
 .preset button {
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: inherit;
   background: none;
   border: 0;
   cursor: pointer;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.65rem;
 }
 
 .preset .preset-delete {
-  padding: 0.25rem 0.6rem 0.25rem 0;
+  padding: 0.2rem 0.6rem 0.2rem 0;
   opacity: 0.7;
 }
 
@@ -649,7 +1009,7 @@ button.tag {
 .setting-row label {
   display: block;
   margin-bottom: 0.35rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .setting-control {
@@ -662,35 +1022,29 @@ button.tag {
 .setting-control input[type="range"] {
   flex: 1;
   min-width: 0;
-  height: 6px;
+  height: 8px;
   appearance: none;
-  border-radius: 999px;
   background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--border) var(--fill, 0%));
   cursor: pointer;
 }
 
 .setting-control input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: 50%;
+  width: 1rem;
+  height: 1.4rem;
+  border-radius: 2px;
   background: var(--accent);
-  border: 3px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .setting-control input[type="range"]::-moz-range-thumb {
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 50%;
+  width: 0.7rem;
+  height: 1.1rem;
+  border-radius: 2px;
   background: var(--accent);
-  border: 3px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.setting-control input[type="range"]:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .number-wrap {
@@ -704,19 +1058,33 @@ button.tag {
 .number-wrap input[type="number"] {
   width: 4.25rem;
   font: inherit;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 6px;
   background: var(--bg);
   color: var(--text);
 }
 
 .number-wrap input[type="number"]:focus {
-  outline: 2px solid var(--accent);
-  border-color: var(--accent);
+  border-color: var(--g1);
 }
 
 .number-wrap .unit {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* ==========================================================
+   Chi preferisce meno movimento: niente animazioni
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+
+  .tags-panel,
+  .button,
+  .icon-button {
+    transition: none;
+  }
 }

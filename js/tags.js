@@ -149,6 +149,14 @@ export function initTags({ onChange, countUsage, onTagDeleted }) {
     }
   });
 
+  // Un clic fuori dal pannello (e fuori dal suo pulsante) lo chiude.
+  // Si usa pointerdown e non click: il pannello si ridisegna ai clic e l'elemento cliccato sparirebbe.
+  document.addEventListener('pointerdown', (event) => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(event.target) || toggleButton.contains(event.target)) return;
+    setPanelOpen(false);
+  });
+
   // Creazione di un nuovo tag
   form.addEventListener('submit', (event) => {
     event.preventDefault();

@@ -42,6 +42,9 @@ const saveButton = document.getElementById('timer-save');
 const presetList = document.getElementById('preset-list');
 const presetForm = document.getElementById('preset-form');
 const presetName = document.getElementById('preset-name');
+const ringEl = document.getElementById('timer-ring');
+const dotsEl = document.getElementById('timer-dots');
+const announceEl = document.getElementById('timer-announce');
 
 function phaseSeconds(forMode) {
   return settings[forMode] * 60;
@@ -59,14 +62,37 @@ function formatTime(totalSeconds) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+// L'anello è un cerchio SVG: stroke-dasharray = lunghezza della circonferenza,
+// stroke-dashoffset = quanta parte è nascosta. Più il tempo passa, più l'anello si svuota.
+const RING_LENGTH = 2 * Math.PI * 90;   // raggio 90, come nell'HTML
+ringEl.style.strokeDasharray = RING_LENGTH;
+
+let lastMode = null;   // per annunciare a voce solo i cambi di fase
+
 function render() {
   modeEl.textContent = MODE_LABELS[mode];
   displayEl.textContent = formatTime(remaining);
-  cycleEl.textContent = `Ciclo ${cycle} di ${settings.cycles}`;
+  cycleEl.textContent = `Pomodoro ${cycle} di ${settings.cycles}`;
+  ringEl.style.strokeDashoffset = RING_LENGTH * (1 - remaining / phaseSeconds(mode));
+
+  // Un pallino per ogni pomodoro del giro: pieno = fatto, con anello = quello in corso
+  dotsEl.replaceChildren(...Array.from({ length: settings.cycles }, (_, index) => {
+    const dot = document.createElement('li');
+    const number = index + 1;
+    if (number < cycle || (number === cycle && mode !== 'work')) dot.className = 'done';
+    else if (number === cycle) dot.className = 'current';
+    return dot;
+  }));
+
   // Un solo pulsante che cambia etichetta: Avvia / Pausa / Riprendi
   const started = remaining < phaseSeconds(mode);
   startButton.textContent = isRunning() ? 'Pausa' : started ? 'Riprendi' : 'Avvia';
   document.documentElement.dataset.timerMode = mode;   // il CSS può colorare in base alla fase
+
+  if (mode !== lastMode) {
+    if (lastMode !== null) announceEl.textContent = `Fase: ${MODE_LABELS[mode]}`;
+    lastMode = mode;
+  }
 }
 
 // ---------- Controllo del timer ----------
@@ -177,7 +203,7 @@ function renderPresets() {
     loadButton.type = 'button';
     loadButton.className = 'preset-load';
     loadButton.dataset.id = preset.id;
-    loadButton.title = `Lavoro ${preset.work} · pausa ${preset.shortBreak} · pausa lunga ${preset.longBreak} · ${preset.cycles} cicli`;
+    loadButton.title = `Lavoro ${preset.work} min, pausa ${preset.shortBreak} min, pausa lunga ${preset.longBreak} min, ${preset.cycles} cicli`;
     loadButton.textContent = preset.name;
     const detail = document.createElement('small');
     detail.textContent = `${preset.work}/${preset.shortBreak}/${preset.longBreak}`;
@@ -234,6 +260,14 @@ export function initTimer() {
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || !panel.classList.contains('open')) return;
     if (panel.contains(event.target) || event.target === document.body) setPanelOpen(false);
+  });
+
+  // Un clic fuori dal pannello (e fuori dal suo pulsante) lo chiude.
+  // Si usa pointerdown e non click: il pannello si ridisegna ai clic e l'elemento cliccato sparirebbe.
+  document.addEventListener('pointerdown', (event) => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(event.target) || settingsToggle.contains(event.target)) return;
+    setPanelOpen(false);
   });
 
   // Mentre si trascina il cursore o si scrive, il valore accanto si aggiorna subito (evento "input")

@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <!-- Impostazioni di base: caratteri accentati e adattamento agli schermi piccoli -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Focus App</title>
+  <meta name="color-scheme" content="light dark">
+  <title>Biolcuss Focus App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..800&family=Press+Start+2P&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Intestazione: titolo dell'app e interruttore del tema (attivato nella Tappa 3) -->
+  <a class="skip-link" href="#todo-section">Vai alle task</a>
+
   <header class="app-header">
-    <h1>Focus App</h1>
-    <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema">🌙</button>
+    <h1 translate="no">Biolcuss Focus App<span class="cursor" aria-hidden="true"></span></h1>
+    <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema"></button>
   </header>
 
-  <!-- Contenuto principale: due sezioni affiancate -->
   <main class="layout">
 
-    <!-- Sezione Pomodoro timer -->
-    <section class="card" id="timer-section">
-      <div class="card-header">
-        <h2>Pomodoro</h2>
-        <button id="timer-settings-toggle" type="button" class="icon-button" aria-label="Impostazioni timer" aria-expanded="false" aria-controls="timer-panel">⋯</button>
+    <!-- Timer: un quadrante scuro con l'anello che si svuota. Resta fermo a sinistra mentre si scorrono le task. -->
+    <section class="dial-plate" id="timer-section" aria-label="Pomodoro">
+      <button id="timer-settings-toggle" type="button" class="icon-button dial-settings" aria-label="Impostazioni timer" aria-expanded="false" aria-controls="timer-panel">⋯</button>
+
+      <div class="dial">
+        <svg class="dial-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="ring-track" cx="100" cy="100" r="90"></circle>
+          <circle id="timer-ring" class="ring-progress" cx="100" cy="100" r="90"></circle>
+          <circle class="ring-ticks" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div class="dial-face">
+          <p id="timer-mode" class="timer-mode">Lavoro</p>
+          <p id="timer-display" class="timer-display" role="timer">25:00</p>
+          <ol id="timer-dots" class="timer-dots" aria-hidden="true"></ol>
+        </div>
       </div>
 
-      <p id="timer-mode" class="timer-mode">Lavoro</p>
-      <p id="timer-display" class="timer-display">25:00</p>
+      <p id="timer-cycle" class="timer-cycle">Pomodoro 1 di 4</p>
 
       <div class="timer-controls">
         <button id="timer-start" type="button" class="button primary">Avvia</button>
@@ -33,72 +45,14 @@
         <button id="timer-reset" type="button" class="button">Reset</button>
       </div>
 
-      <p id="timer-cycle" class="timer-cycle">Ciclo 1 di 4</p>
-
-      <!-- Pannello impostazioni: cassetto laterale come quello dei tag, gestito da js/timer.js.
-           Le modifiche restano in una "bozza" finché non si preme Salva (che resetta il timer).
-           Le preimpostazioni sono create da JavaScript dentro #preset-list. -->
-      <aside id="timer-panel" class="tags-panel timer-panel" aria-label="Impostazioni timer" inert>
-        <div class="drawer-header">
-          <h2>Impostazioni timer</h2>
-          <button id="timer-panel-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="panel-body">
-          <section class="panel-section">
-            <h3>Preimpostazioni</h3>
-            <div id="preset-list" class="preset-list"></div>
-            <form id="preset-form" class="preset-form">
-              <input id="preset-name" type="text" placeholder="Nome (es. Studio)" maxlength="20" autocomplete="off" required>
-              <button type="submit" class="button small">Salva preimpostazione</button>
-            </form>
-          </section>
-
-          <form id="timer-settings" class="panel-section timer-settings">
-            <h3>Durate</h3>
-          <div class="setting-row">
-            <label for="set-work">Lavoro</label>
-            <div class="setting-control">
-              <input type="range" data-key="work" data-role="range" min="1" max="90" step="1" aria-label="Lavoro (cursore)">
-              <span class="number-wrap"><input id="set-work" type="number" data-key="work" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
-            </div>
-          </div>
-          <div class="setting-row">
-            <label for="set-shortBreak">Pausa breve</label>
-            <div class="setting-control">
-              <input type="range" data-key="shortBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa breve (cursore)">
-              <span class="number-wrap"><input id="set-shortBreak" type="number" data-key="shortBreak" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
-            </div>
-          </div>
-          <div class="setting-row">
-            <label for="set-longBreak">Pausa lunga</label>
-            <div class="setting-control">
-              <input type="range" data-key="longBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa lunga (cursore)">
-              <span class="number-wrap"><input id="set-longBreak" type="number" data-key="longBreak" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
-            </div>
-          </div>
-          <div class="setting-row">
-            <label for="set-cycles">Cicli prima della pausa lunga</label>
-            <div class="setting-control">
-              <input type="range" data-key="cycles" data-role="range" min="2" max="12" step="1" aria-label="Cicli prima della pausa lunga (cursore)">
-              <span class="number-wrap"><input id="set-cycles" type="number" data-key="cycles" data-role="number" min="2" max="12" step="1"><span class="unit">cicli</span></span>
-            </div>
-          </div>
-          </form>
-        </div>
-
-        <div class="panel-footer">
-          <p class="hint">Salvando, il timer torna all'inizio.</p>
-          <button id="timer-save" type="button" class="button primary">Salva</button>
-        </div>
-      </aside>
+      <!-- Annuncia a voce (screen reader) i cambi di fase -->
+      <p id="timer-announce" class="sr-only" aria-live="polite"></p>
     </section>
 
-    <!-- Sezione To-do list -->
-    <section class="card" id="todo-section">
-      <div class="card-header">
-        <h2>Task</h2>
-        <button id="tags-toggle" type="button" class="button" aria-expanded="false">Tag e filtri</button>
+    <section class="board" id="todo-section" aria-labelledby="board-title" tabindex="-1">
+      <div class="board-header">
+        <h2 id="board-title">Task</h2>
+        <button id="tags-toggle" type="button" class="button" aria-expanded="false" aria-controls="tags-panel">Tag e filtri</button>
       </div>
 
       <!-- Pannello laterale tag e filtri: scorre da destra sopra la pagina, senza spostare il kanban.
@@ -109,7 +63,7 @@
           <button id="tags-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
         </div>
         <form id="tag-form" class="tag-form">
-          <input id="tag-name" type="text" placeholder="Nuovo tag (es. lavoro)" maxlength="20" autocomplete="off" required>
+          <input id="tag-name" name="tag" type="text" placeholder="Nuovo tag (es. lavoro)…" aria-label="Nome del nuovo tag" maxlength="20" autocomplete="off" required>
           <button type="submit" class="button primary">Crea tag</button>
           <!-- I pallini colorati vengono creati da js/tags.js (palette limitata) -->
           <div id="tag-colors" class="color-picker" role="radiogroup" aria-label="Colore del tag"></div>
@@ -120,37 +74,94 @@
       </aside>
 
       <!-- Kanban: tre colonne. data-status collega ogni colonna allo stato delle task.
-           Le task vengono create da JavaScript (js/todo.js) dentro ogni <ul>.
-           In cima a ogni colonna: pulsante "Aggiungi task" che apre il campo di testo. -->
+           Le task vengono create da JavaScript (js/todo.js) dentro ogni <ul>. -->
       <div class="kanban">
-        <div class="kanban-column" data-status="todo">
-          <h3>To-do <span class="column-count"></span></h3>
+        <section class="kanban-column" data-status="todo" aria-labelledby="col-todo">
+          <h3 id="col-todo"><span class="status-dot" aria-hidden="true"></span>To-do <span class="column-count"></span></h3>
           <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
           <form class="add-form" hidden>
-            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+            <input class="add-input" name="task" type="text" placeholder="Scrivi e premi Invio…" aria-label="Nuova task in To-do" maxlength="200" autocomplete="off" required>
           </form>
           <ul class="todo-list"></ul>
-        </div>
-        <div class="kanban-column" data-status="doing">
-          <h3>In corso <span class="column-count"></span></h3>
+        </section>
+        <section class="kanban-column" data-status="doing" aria-labelledby="col-doing">
+          <h3 id="col-doing"><span class="status-dot" aria-hidden="true"></span>In corso <span class="column-count"></span></h3>
           <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
           <form class="add-form" hidden>
-            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+            <input class="add-input" name="task" type="text" placeholder="Scrivi e premi Invio…" aria-label="Nuova task in In corso" maxlength="200" autocomplete="off" required>
           </form>
           <ul class="todo-list"></ul>
-        </div>
-        <div class="kanban-column" data-status="done">
-          <h3>Completate <span class="column-count"></span></h3>
+        </section>
+        <section class="kanban-column" data-status="done" aria-labelledby="col-done">
+          <h3 id="col-done"><span class="status-dot" aria-hidden="true"></span>Completate <span class="column-count"></span></h3>
           <button type="button" class="add-button" data-action="open-add">+ Aggiungi task</button>
           <form class="add-form" hidden>
-            <input class="add-input" type="text" placeholder="Scrivi e premi Invio" maxlength="200" autocomplete="off" required>
+            <input class="add-input" name="task" type="text" placeholder="Scrivi e premi Invio…" aria-label="Nuova task in Completate" maxlength="200" autocomplete="off" required>
           </form>
           <ul class="todo-list"></ul>
-        </div>
+        </section>
       </div>
     </section>
 
   </main>
+
+  <!-- Pannello impostazioni del timer: cassetto laterale come quello dei tag, gestito da js/timer.js.
+       Le modifiche restano in una "bozza" finché non si preme Salva (che resetta il timer).
+       Le preimpostazioni sono create da JavaScript dentro #preset-list. -->
+  <aside id="timer-panel" class="tags-panel timer-panel" aria-label="Impostazioni timer" inert>
+    <div class="drawer-header">
+      <h2>Impostazioni timer</h2>
+      <button id="timer-panel-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
+    </div>
+  
+    <div class="panel-body">
+      <section class="panel-section">
+        <h3>Preimpostazioni</h3>
+        <div id="preset-list" class="preset-list"></div>
+        <form id="preset-form" class="preset-form">
+          <input id="preset-name" type="text" placeholder="Nome (es. Studio)…" name="preset" aria-label="Nome della preimpostazione" maxlength="20" autocomplete="off" required>
+          <button type="submit" class="button small">Salva preimpostazione</button>
+        </form>
+      </section>
+  
+      <form id="timer-settings" class="panel-section timer-settings">
+        <h3>Durate</h3>
+      <div class="setting-row">
+        <label for="set-work">Lavoro</label>
+        <div class="setting-control">
+          <input type="range" data-key="work" data-role="range" min="1" max="90" step="1" aria-label="Lavoro (cursore)">
+          <span class="number-wrap"><input id="set-work" type="number" data-key="work" name="work" inputmode="numeric" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label for="set-shortBreak">Pausa breve</label>
+        <div class="setting-control">
+          <input type="range" data-key="shortBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa breve (cursore)">
+          <span class="number-wrap"><input id="set-shortBreak" type="number" data-key="shortBreak" name="shortBreak" inputmode="numeric" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label for="set-longBreak">Pausa lunga</label>
+        <div class="setting-control">
+          <input type="range" data-key="longBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa lunga (cursore)">
+          <span class="number-wrap"><input id="set-longBreak" type="number" data-key="longBreak" name="longBreak" inputmode="numeric" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label for="set-cycles">Cicli prima della pausa lunga</label>
+        <div class="setting-control">
+          <input type="range" data-key="cycles" data-role="range" min="2" max="12" step="1" aria-label="Cicli prima della pausa lunga (cursore)">
+          <span class="number-wrap"><input id="set-cycles" type="number" data-key="cycles" name="cycles" inputmode="numeric" data-role="number" min="2" max="12" step="1"><span class="unit">cicli</span></span>
+        </div>
+      </div>
+      </form>
+    </div>
+  
+    <div class="panel-footer">
+      <p class="hint">Salvando, il timer torna all'inizio.</p>
+      <button id="timer-save" type="button" class="button primary">Salva</button>
+    </div>
+  </aside>
 
   <!-- Il JavaScript viene caricato come modulo (per questo serve Live Server) -->
   <script type="module" src="js/main.js"></script>

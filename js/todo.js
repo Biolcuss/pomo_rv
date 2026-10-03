@@ -55,7 +55,7 @@ function render() {
     lists[status].replaceChildren(...columnTasks.map(createTaskElement));
     // Il numero di task accanto al titolo della colonna
     lists[status].parentElement.querySelector('.column-count').textContent =
-      `(${columnTasks.length})`;
+      String(columnTasks.length);
   }
 }
 
@@ -82,13 +82,13 @@ function createTaskElement(task) {
     const text = document.createElement('span');
     text.className = 'todo-text';
     text.textContent = task.text;   // textContent è sicuro: non interpreta HTML
-    main.append(text, createActionButton('menu', '⋯', 'Azioni'));
+    main.append(text, createActionButton('menu', '⋯', 'Azioni sulla task'));
   }
   li.append(main);
 
   // Menu a tre puntini (aperto con il pulsante ⋯)
   if (task.id === menuId) {
-    li.append(createTaskMenu());
+    li.append(createTaskMenu(task));
   }
 
   // Tag assegnati alla task
@@ -108,25 +108,39 @@ function createTaskElement(task) {
   return li;
 }
 
-function createTaskMenu() {
+const STATUS_LABELS = { todo: 'To-do', doing: 'In corso', done: 'Completate' };
+
+// Il menu include "Sposta in…": un'alternativa al drag & drop, utile da tastiera e su touchscreen.
+function createTaskMenu(task) {
   const menu = document.createElement('div');
   menu.className = 'task-menu';
   menu.setAttribute('role', 'menu');
 
-  const items = [
-    ['edit', 'Modifica'],
-    ['tag', 'Tag'],
-    ['delete', 'Elimina'],
+  const moves = STATUSES.filter((status) => status !== task.status)
+    .map((status) => [`move-${status}`, `Sposta in ${STATUS_LABELS[status]}`]);
+  const groups = [
+    [['edit', 'Modifica'], ['tag', 'Tag']],
+    moves,
+    [['delete', 'Elimina']],
   ];
-  for (const [action, label] of items) {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'menu-item';
-    item.dataset.action = action;
-    item.setAttribute('role', 'menuitem');
-    item.textContent = label;
-    menu.append(item);
-  }
+
+  groups.forEach((group, index) => {
+    if (index > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'menu-divider';
+      divider.setAttribute('role', 'separator');
+      menu.append(divider);
+    }
+    for (const [action, label] of group) {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'menu-item';
+      item.dataset.action = action;
+      item.setAttribute('role', 'menuitem');
+      item.textContent = label;
+      menu.append(item);
+    }
+  });
   return menu;
 }
 
@@ -368,7 +382,7 @@ export function initTodo() {
     const action = button.dataset.action;
 
     // Scegliere una voce del menu lo richiude
-    if (action === 'edit' || action === 'tag' || action === 'delete') {
+    if (action === 'edit' || action === 'tag' || action === 'delete' || action.startsWith('move-')) {
       menuId = null;
     }
 
@@ -394,6 +408,10 @@ export function initTodo() {
         break;
       case 'toggle-tag':
         toggleTaskTag(id, button.dataset.tagId);
+        break;
+      default:
+        // "Sposta in…": la task va in fondo alla colonna scelta
+        if (action.startsWith('move-')) moveTask(id, action.slice(5), null);
         break;
     }
   });

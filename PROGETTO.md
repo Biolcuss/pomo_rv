@@ -19,7 +19,7 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Aggiungere, modificare ed eliminare task
 - **Tag** personalizzabili e colorati (es. lavoro, casa, urgente, 5 minuti): una task può averne più di uno
 - Colori dei tag scelti da una palette di 9 colori; la colonna Completate è visivamente "oscurata" (anche nel tema scuro)
-- Pannello laterale (cassetto da destra, non sposta il kanban) per creare/eliminare tag e mostrare solo le task con certi tag
+- Pannello laterale (cassetto da destra, non sposta il kanban) per creare/eliminare tag e mostrare solo le task con certi tag. I pannelli laterali si chiudono anche con un clic fuori
 - Le task e i tag restano salvati anche chiudendo il browser
 
 ### Pomodoro timer
@@ -30,8 +30,10 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 - Suono e notifica del browser a fine sessione
 
 ### Generale
-- Pagina unica: timer in alto (card compatta), kanban sotto a tutta larghezza (colonne impilate su schermi piccoli)
+- Pagina unica: timer a sinistra (quadrante scuro con anello che si svuota, resta fermo mentre si scorre) e kanban a destra; su schermi stretti timer sopra e colonne impilate
+- Menu della task con "Sposta in…" come alternativa al drag & drop (tastiera e touch)
 - Tema chiaro / scuro selezionabile con un interruttore (la scelta viene ricordata)
+- Estetica "terminale / Hyprland": font JetBrains Mono + Press Start 2P (titolo e cifre del timer), finestre con bordo a gradiente quando sono attive, anello del timer a segmenti. Tema chiaro: bianco + viola (pause in ambra). Tema scuro: nero/grigio + verde fosforo (pause in ambra)
 - Interfaccia in italiano
 
 ## Decisioni tecniche (e perché)
