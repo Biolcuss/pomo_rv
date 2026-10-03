@@ -25,7 +25,8 @@ La prima versione funziona **solo in locale** (sul proprio computer, nel browser
 ### Pomodoro timer
 - Avvio, pausa e reset
 - Cicli automatici: lavoro → pausa breve → … → pausa lunga ogni N cicli
-- Durate personalizzabili: lavoro, pausa breve, pausa lunga, numero di cicli prima della pausa lunga
+- Durate personalizzabili (cursore 1–90 minuti + campo numerico) in un pannello laterale aperto dal pulsante ⋯, nei colori "pomodoro": lavoro, pausa breve, pausa lunga, cicli prima della pausa lunga. Le modifiche valgono solo premendo **Salva** (che resetta il timer); chiudendo il pannello si scartano
+- Preimpostazioni delle durate: una di fabbrica ("Classico" 25/5/15/4) e quelle create dall'utente (con nome), caricabili con un clic ed eliminabili
 - Suono e notifica del browser a fine sessione
 
 ### Generale
@@ -70,8 +71,8 @@ Ogni tappa: spiegazione dei concetti → codice → prova nel browser → commit
 - [x] 4. **To-do base** — aggiungi, completa, modifica, elimina, salvataggio
 - [x] 5. **Kanban** — tre colonne con drag & drop
 - [x] 5b. **Tag e filtri** — tag colorati, più tag per task, pannello filtri richiudibile
-- [ ] 6. **Pomodoro base** — start/pausa/reset e cicli
-- [ ] 7. **Impostazioni Pomodoro** — durate personalizzabili
+- [x] 6. **Pomodoro base** — start/pausa/reset/salta e cicli automatici
+- [x] 7. **Impostazioni Pomodoro** — durate e numero di cicli personalizzabili, salvati nel browser
 - [ ] 8. **Suono e notifiche**
 - [ ] 9. **Rifinitura** — tempo nel titolo della scheda, accessibilità, pulizia
 

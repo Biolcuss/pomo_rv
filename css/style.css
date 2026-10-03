@@ -517,6 +517,206 @@ button.tag {
 }
 
 .timer-cycle {
-  margin: 1rem 0 0;
+  margin: 1rem 0 1rem;
   color: var(--text-muted);
+}
+
+/* Le pause hanno un colore diverso dal lavoro */
+:root[data-timer-mode="shortBreak"] .timer-mode,
+:root[data-timer-mode="longBreak"] .timer-mode {
+  color: #3fa66a;
+}
+
+/* ---------- Pannello impostazioni timer ----------
+   Riusa il cassetto dei tag (.tags-panel), più largo; il colore pomodoro
+   è usato solo per i dettagli (cursori, pulsante Salva, preimpostazione attiva). */
+.timer-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 100vw);
+  padding: 0;
+  overflow: hidden;   /* scorre solo .panel-body: il pulsante Salva resta fermo in basso */
+  text-align: left;
+}
+
+.timer-panel .drawer-header {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: grid;
+  align-content: start;
+  gap: 1.5rem;
+}
+
+.panel-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.panel-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.panel-footer .hint {
+  margin: 0 0 0.5rem;
+}
+
+.panel-footer .button {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Preimpostazioni: pillole cliccabili; quella uguale ai valori attuali è evidenziata */
+.preset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.preset {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.preset.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.preset button {
+  font: inherit;
+  font-size: 0.9rem;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0.25rem 0.75rem;
+}
+
+.preset .preset-delete {
+  padding: 0.25rem 0.6rem 0.25rem 0;
+  opacity: 0.7;
+}
+
+.preset-load small {
+  margin-left: 0.35rem;
+  opacity: 0.75;
+}
+
+.preset-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preset-form input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Durate */
+.timer-settings {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.timer-settings h3 {
+  margin-bottom: 0;
+}
+
+.setting-row label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Cursore: la parte già percorsa è nel colore pomodoro (--fill è impostata da timer.js) */
+.setting-control input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 6px;
+  appearance: none;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--border) var(--fill, 0%));
+  cursor: pointer;
+}
+
+.setting-control input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.setting-control input[type="range"]::-moz-range-thumb {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.setting-control input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.number-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 8rem;
+  flex: none;
+}
+
+.number-wrap input[type="number"] {
+  width: 4.25rem;
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.number-wrap input[type="number"]:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
+}
+
+.number-wrap .unit {
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }

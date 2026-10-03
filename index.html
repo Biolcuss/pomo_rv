@@ -19,17 +19,79 @@
 
     <!-- Sezione Pomodoro timer -->
     <section class="card" id="timer-section">
-      <h2>Pomodoro</h2>
+      <div class="card-header">
+        <h2>Pomodoro</h2>
+        <button id="timer-settings-toggle" type="button" class="icon-button" aria-label="Impostazioni timer" aria-expanded="false" aria-controls="timer-panel">⋯</button>
+      </div>
 
       <p id="timer-mode" class="timer-mode">Lavoro</p>
       <p id="timer-display" class="timer-display">25:00</p>
 
       <div class="timer-controls">
         <button id="timer-start" type="button" class="button primary">Avvia</button>
+        <button id="timer-skip" type="button" class="button" title="Passa alla fase successiva">Salta</button>
         <button id="timer-reset" type="button" class="button">Reset</button>
       </div>
 
       <p id="timer-cycle" class="timer-cycle">Ciclo 1 di 4</p>
+
+      <!-- Pannello impostazioni: cassetto laterale come quello dei tag, gestito da js/timer.js.
+           Le modifiche restano in una "bozza" finché non si preme Salva (che resetta il timer).
+           Le preimpostazioni sono create da JavaScript dentro #preset-list. -->
+      <aside id="timer-panel" class="tags-panel timer-panel" aria-label="Impostazioni timer" inert>
+        <div class="drawer-header">
+          <h2>Impostazioni timer</h2>
+          <button id="timer-panel-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
+        </div>
+
+        <div class="panel-body">
+          <section class="panel-section">
+            <h3>Preimpostazioni</h3>
+            <div id="preset-list" class="preset-list"></div>
+            <form id="preset-form" class="preset-form">
+              <input id="preset-name" type="text" placeholder="Nome (es. Studio)" maxlength="20" autocomplete="off" required>
+              <button type="submit" class="button small">Salva preimpostazione</button>
+            </form>
+          </section>
+
+          <form id="timer-settings" class="panel-section timer-settings">
+            <h3>Durate</h3>
+          <div class="setting-row">
+            <label for="set-work">Lavoro</label>
+            <div class="setting-control">
+              <input type="range" data-key="work" data-role="range" min="1" max="90" step="1" aria-label="Lavoro (cursore)">
+              <span class="number-wrap"><input id="set-work" type="number" data-key="work" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="set-shortBreak">Pausa breve</label>
+            <div class="setting-control">
+              <input type="range" data-key="shortBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa breve (cursore)">
+              <span class="number-wrap"><input id="set-shortBreak" type="number" data-key="shortBreak" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="set-longBreak">Pausa lunga</label>
+            <div class="setting-control">
+              <input type="range" data-key="longBreak" data-role="range" min="1" max="90" step="1" aria-label="Pausa lunga (cursore)">
+              <span class="number-wrap"><input id="set-longBreak" type="number" data-key="longBreak" data-role="number" min="1" max="90" step="1"><span class="unit">min</span></span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="set-cycles">Cicli prima della pausa lunga</label>
+            <div class="setting-control">
+              <input type="range" data-key="cycles" data-role="range" min="2" max="12" step="1" aria-label="Cicli prima della pausa lunga (cursore)">
+              <span class="number-wrap"><input id="set-cycles" type="number" data-key="cycles" data-role="number" min="2" max="12" step="1"><span class="unit">cicli</span></span>
+            </div>
+          </div>
+          </form>
+        </div>
+
+        <div class="panel-footer">
+          <p class="hint">Salvando, il timer torna all'inizio.</p>
+          <button id="timer-save" type="button" class="button primary">Salva</button>
+        </div>
+      </aside>
     </section>
 
     <!-- Sezione To-do list -->
