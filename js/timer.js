@@ -158,13 +158,18 @@ function nextPhase(autoStart) {
   if (autoStart) start();
 }
 
-// Torna all'inizio: primo ciclo, fase di lavoro, tempo pieno.
-function reset() {
+// Riporta la fase corrente a tempo pieno e ferma il timer (fase e ciclo restano quelli).
+function resetPhase() {
   stop();
-  mode = 'work';
-  cycle = 1;
   remaining = phaseSeconds(mode);
   render();
+}
+
+// Torna all'inizio: primo ciclo, fase di lavoro, tempo pieno.
+function reset() {
+  mode = 'work';
+  cycle = 1;
+  resetPhase();
 }
 
 // ---------- Impostazioni ----------
@@ -282,7 +287,7 @@ export function initTimer() {
     }
   });
   resetButton.addEventListener('click', () => {
-    reset();
+    resetPhase();
     playSound('timerReset');
   });
   skipButton.addEventListener('click', () => {

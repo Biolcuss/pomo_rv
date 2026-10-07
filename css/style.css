@@ -1077,7 +1077,8 @@ button.tag {
   border-bottom: 0;
   box-shadow: var(--shadow-drawer);
   transform: translateX(100%);
-  transition: transform 0.2s steps(5);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
   text-align: left;
 }
 
@@ -1260,6 +1261,51 @@ button.tag {
 .preset-form input[type="text"] {
   flex: 1;
   min-width: 0;
+}
+
+/* Voci del negozio: card a tutta larghezza come le task, impilate */
+/* Il pulsante "Aggiungi voce" ha le stesse dimensioni del campo di testo che lo sostituisce */
+.add-button.shop-add {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: inherit;
+}
+
+.shop-hint {
+  margin-bottom: 1rem;
+}
+
+.shop-item {
+  cursor: default;
+}
+
+.shop-buy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.shop-buy:hover:not(:disabled) .todo-text {
+  color: var(--accent-ink);
+}
+
+.shop-buy:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.preset button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* Durate */

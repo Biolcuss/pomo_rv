@@ -118,6 +118,13 @@ export function adjustPoints(delta) {
   if (delta > 0) levelUpEffect(levelBefore);
 }
 
+// Spende punti nel negozio. Ritorna false (senza fare nulla) se non bastano.
+export function spendPoints(cost) {
+  if (cost > state.points) return false;
+  adjustPoints(-cost);
+  return true;
+}
+
 // Azzera punti e statistiche
 export function resetRewards() {
   state = { points: 0, tasks: 0, pomodoros: 0 };

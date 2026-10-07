@@ -6,11 +6,13 @@ import { initTimer } from './timer.js';
 import { initSound } from './sound.js';
 import { initRewards } from './rewards.js';
 import { initSettings } from './settings.js';
+import { initShop } from './shop.js';
 
 initTheme();
 initSound();
 initRewards();
 initSettings();
+initShop();
 initTodo();
 initJourney();
 initTimer();

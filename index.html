@@ -31,6 +31,9 @@
       <span class="reward-track" aria-hidden="true"><span id="reward-bar" class="reward-bar"></span></span>
     </div>
     <div class="header-tools">
+      <button id="shop-toggle" class="icon-button" type="button" aria-label="Negozio" aria-expanded="false" aria-controls="shop-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </button>
       <button id="sound-toggle" class="icon-button" type="button" aria-label="Disattiva i suoni"></button>
       <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambia tema"></button>
       <button id="settings-toggle" class="icon-button" type="button" aria-label="Impostazioni" aria-expanded="false" aria-controls="settings-panel">
@@ -186,6 +189,25 @@
     <div class="panel-footer">
       <p class="hint">Salvando, il timer torna all'inizio.</p>
       <button id="timer-save" type="button" class="button primary">Salva</button>
+    </div>
+  </aside>
+
+  <!-- Negozio (js/shop.js): cassetto laterale dove si spendono i punti -->
+  <aside id="shop-panel" class="tags-panel timer-panel" aria-label="Negozio" inert>
+    <div class="drawer-header">
+      <h2>Negozio</h2>
+      <button id="shop-close" type="button" class="icon-button small" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="panel-body">
+      <section class="panel-section">
+        <p id="shop-balance" class="stats-line"></p>
+        <p class="hint shop-hint">Scambia i punti guadagnati con le tue ricompense: crea una voce, imposta il prezzo con ✎ e cliccala per riscattarla.</p>
+        <button id="shop-add-button" type="button" class="add-button shop-add">+ Aggiungi voce</button>
+        <form id="shop-form" class="add-form" hidden>
+          <input id="shop-name" class="add-input" type="text" placeholder="Scrivi e premi Invio…" aria-label="Nuova voce del negozio" maxlength="40" autocomplete="off" required>
+        </form>
+        <ul id="shop-list" class="todo-list shop-list"></ul>
+      </section>
     </div>
   </aside>
 
